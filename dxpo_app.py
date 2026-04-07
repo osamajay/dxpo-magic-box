@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 # ── HEADER ──
-st.title("🪄 DXPO AI Magic Box")
+st.title("DXPO AI Magic Box")
 st.subheader(
     "Powered by Dr. Jay Rajasekera | "
     "Tokyo International University")
@@ -70,78 +70,104 @@ else:
 
     if uploaded_file is not None:
         try:
-            # Load data
-            if uploaded_file.name.endswith(".csv"):
-                df = pd.read_csv(uploaded_file)
-            else:
-                df = pd.read_excel(uploaded_file)
+            # ── SHEET SELECTOR ──
+            if not uploaded_file.name.endswith(
+                    ".csv"):
+                xl = pd.ExcelFile(uploaded_file)
+                sheet_names = xl.sheet_names
+                if len(sheet_names) > 1:
+                    st.info(
+                        f"Found {len(sheet_names)}"
+                        f" sheets in your file!")
+                    selected_sheet = st.selectbox(
+                        "Select sheet to analyze:",
+                        sheet_names)
+                else:
+                    selected_sheet = sheet_names[0]
 
-            st.success(
-                f"✅ Loaded: {uploaded_file.name}")
+                df = pd.read_excel(
+                    uploaded_file,
+                    sheet_name=selected_sheet)
+                st.success(
+                    f"✅ Loaded sheet: "
+                    f"'{selected_sheet}' from "
+                    f"{uploaded_file.name}")
+            else:
+                df = pd.read_csv(uploaded_file)
+                st.success(
+                    f"✅ Loaded: {uploaded_file.name}")
 
             # ── DATA CLEANING (Option 2) ──
             if "MESSY" in situation:
                 st.markdown("---")
                 st.subheader("🔧 Data Cleaning Agent")
 
-                issues = []
                 missing = df.isnull().sum().sum()
                 dupes = df.duplicated().sum()
 
-                col1, col2, col3, col4 = st.columns(4)
+                col1, col2, col3, col4 = (
+                    st.columns(4))
                 with col1:
-                    st.metric("Rows", f"{df.shape[0]:,}")
+                    st.metric("Rows",
+                        f"{df.shape[0]:,}")
                 with col2:
-                    st.metric("Columns", df.shape[1])
+                    st.metric("Columns",
+                        df.shape[1])
                 with col3:
-                    st.metric("Missing Values", missing,
-                        delta="⚠️" if missing > 0 else "✅")
+                    st.metric("Missing Values",
+                        missing)
                 with col4:
-                    st.metric("Duplicates", dupes,
-                        delta="⚠️" if dupes > 0 else "✅")
+                    st.metric("Duplicates", dupes)
 
                 if missing > 0 or dupes > 0:
-                    if st.button("🔧 Auto-Fix Issues"):
-                        if missing > 0:
-                            num_cols = df.select_dtypes(
-                                include=[np.number]).columns
-                            df[num_cols] = df[
-                                num_cols].fillna(0)
-                            df = df.fillna("Unknown")
-                        if dupes > 0:
-                            df = df.drop_duplicates()
-                        st.success("✅ Data cleaned!")
+                    st.warning(
+                        f"Found {missing} missing "
+                        f"values and {dupes} "
+                        f"duplicate rows!")
+                    if st.button(
+                            "🔧 Auto-Fix Issues"):
+                        num_cols = df.select_dtypes(
+                            include=[np.number]
+                            ).columns
+                        df[num_cols] = df[
+                            num_cols].fillna(0)
+                        df = df.fillna("Unknown")
+                        df = df.drop_duplicates()
+                        st.success(
+                            "✅ Data cleaned!")
                 else:
-                    st.success("✅ Data looks clean!")
+                    st.success(
+                        "✅ No issues found!")
 
             # ── DATA PROFILE ──
             st.markdown("---")
             st.subheader("🔍 Data Profile")
 
+            num_cols = df.select_dtypes(
+                include=[np.number]).columns.tolist()
+
             col1, col2, col3, col4 = st.columns(4)
             with col1:
-                st.metric("Rows", f"{df.shape[0]:,}")
+                st.metric("Rows",
+                    f"{df.shape[0]:,}")
             with col2:
                 st.metric("Columns", df.shape[1])
             with col3:
                 st.metric("Missing",
                     df.isnull().sum().sum())
             with col4:
-                num_cols = df.select_dtypes(
-                    include=[np.number]).columns.tolist()
-                st.metric("Numeric Cols", len(num_cols))
+                st.metric("Numeric Cols",
+                    len(num_cols))
 
-            # Data preview
             with st.expander("👀 Preview Data"):
                 st.dataframe(df.head(10),
                     use_container_width=True)
 
-            # ── GENERIC ANALYTICS ──
+            # ── ANALYTICS TABS ──
             if len(num_cols) > 0:
                 st.markdown("---")
                 st.subheader("📊 Automatic Analytics")
 
-                # Tab layout
                 tab1, tab2, tab3, tab4 = st.tabs([
                     "📈 Distributions",
                     "🔗 Correlations",
@@ -149,7 +175,9 @@ else:
                     "🏆 Top Values"])
 
                 with tab1:
-                    st.write("**Distribution of Numeric Columns**")
+                    st.write(
+                        "**Distribution of "
+                        "Numeric Columns**")
                     n_cols = min(len(num_cols), 4)
                     fig, axes = plt.subplots(
                         1, n_cols,
@@ -164,8 +192,7 @@ else:
                             color="#1B3A6B",
                             edgecolor="white")
                         axes[i].set_title(
-                            col[:20],
-                            fontsize=10)
+                            col[:20], fontsize=10)
                         axes[i].set_facecolor(
                             "#FAFAFA")
                         axes[i].spines[
@@ -179,7 +206,7 @@ else:
                 with tab2:
                     if len(num_cols) >= 2:
                         st.write(
-                            "**Correlation Matrix**")
+                            "**Correlation Heatmap**")
                         corr = df[num_cols].corr()
                         fig, ax = plt.subplots(
                             figsize=(8, 6))
@@ -193,12 +220,16 @@ else:
                         ax.set_yticks(
                             range(len(num_cols)))
                         ax.set_xticklabels(
-                            [c[:10] for c in num_cols],
-                            rotation=45, fontsize=8)
-                        ax.set_yticklabels(
-                            [c[:10] for c in num_cols],
+                            [c[:10] for c in
+                             num_cols],
+                            rotation=45,
                             fontsize=8)
-                        for i in range(len(num_cols)):
+                        ax.set_yticklabels(
+                            [c[:10] for c in
+                             num_cols],
+                            fontsize=8)
+                        for i in range(
+                                len(num_cols)):
                             for j in range(
                                     len(num_cols)):
                                 ax.text(
@@ -206,7 +237,7 @@ else:
                                     f"{corr.iloc[i,j]:.2f}",
                                     ha="center",
                                     va="center",
-                                    fontsize=8,
+                                    fontsize=7,
                                     fontweight="bold")
                         ax.set_title(
                             "Correlation Heatmap",
@@ -217,17 +248,20 @@ else:
                         plt.close()
                     else:
                         st.info(
-                            "Need 2+ numeric columns "
-                            "for correlation!")
+                            "Need 2+ numeric columns"
+                            " for correlation!")
 
                 with tab3:
-                    st.write("**Summary Statistics**")
+                    st.write(
+                        "**Summary Statistics**")
                     st.dataframe(
-                        df[num_cols].describe().round(2),
+                        df[num_cols].describe(
+                            ).round(2),
                         use_container_width=True)
 
                 with tab4:
-                    st.write("**Top Values by Column**")
+                    st.write(
+                        "**Top Values Explorer**")
                     selected = st.selectbox(
                         "Select column:",
                         num_cols)
@@ -241,7 +275,8 @@ else:
                         range(len(top_vals)),
                         top_vals[selected],
                         color="#1B3A6B")
-                    ax.set_yticks(range(len(top_vals)))
+                    ax.set_yticks(
+                        range(len(top_vals)))
                     ax.set_yticklabels(
                         [str(i) for i in
                          top_vals.index],
@@ -249,13 +284,22 @@ else:
                     ax.set_title(
                         f"Top {top_n}: {selected}",
                         fontweight="bold")
-                    ax.spines["top"].set_visible(False)
-                    ax.spines["right"].set_visible(False)
+                    ax.spines[
+                        "top"].set_visible(False)
+                    ax.spines[
+                        "right"].set_visible(False)
                     plt.tight_layout()
                     st.pyplot(fig)
                     plt.close()
 
-            # ── ANALYZE BUTTON ──
+            else:
+                st.warning(
+                    "No numeric columns found "
+                    "in this sheet. "
+                    "Try selecting a different "
+                    "sheet or check your data!")
+
+            # ── GENERATE REPORT ──
             st.markdown("---")
             if st.button(
                 "🚀 GENERATE DXPO REPORT!!",
@@ -263,10 +307,9 @@ else:
                 use_container_width=True):
 
                 with st.spinner(
-                    "🪄 Magic Box analyzing... "
-                    "Please wait..."):
+                    "🪄 Magic Box analyzing..."
+                    " Please wait..."):
 
-                    # Build analysis summary
                     num_cols = df.select_dtypes(
                         include=[np.number]
                         ).columns.tolist()
@@ -279,44 +322,51 @@ Numeric columns: {len(num_cols)}
 All columns: {", ".join(df.columns.tolist())}
 """
                     if len(num_cols) > 0:
-                        desc = df[num_cols].describe()
+                        desc = df[
+                            num_cols].describe()
                         analysis += f"""
 Statistical Summary:
 {desc.to_string()}
 """
                         if len(num_cols) >= 2:
-                            corr = df[num_cols].corr()
+                            corr = df[
+                                num_cols].corr()
                             high_corr = []
                             for i in range(
                                     len(num_cols)):
                                 for j in range(
                                         i+1,
                                         len(num_cols)):
-                                    r = corr.iloc[i,j]
+                                    r = corr.iloc[
+                                        i, j]
                                     if abs(r) > 0.5:
                                         high_corr.append(
-                                            f"{num_cols[i]} & "
-                                            f"{num_cols[j]}: "
-                                            f"r={r:.2f}")
+                                            f"{num_cols[i]}"
+                                            f" & {num_cols[j]}"
+                                            f": r={r:.2f}")
                             if high_corr:
                                 analysis += (
-                                    "\nStrong correlations: "
-                                    + ", ".join(
+                                    "\nStrong "
+                                    "correlations: " +
+                                    ", ".join(
                                         high_corr))
 
-                    # Call Claude
                     try:
                         api_key = os.environ.get(
-                            "ANTHROPIC_API_KEY", "")
-                        client = anthropic.Anthropic(
-                            api_key=api_key)
+                            "ANTHROPIC_API_KEY",
+                            "")
+                        client = (
+                            anthropic.Anthropic(
+                                api_key=api_key))
 
-                        message = client.messages.create(
-                            model="claude-opus-4-5",
-                            max_tokens=2000,
-                            messages=[{
-                                "role": "user",
-                                "content": f"""
+                        message = (
+                            client.messages.create(
+                                model=(
+                                    "claude-opus-4-5"),
+                                max_tokens=2000,
+                                messages=[{
+                                    "role": "user",
+                                    "content": f"""
 You are the DXPO AI Magic Box by
 Dr. Jay Rajasekera,
 Tokyo International University.
@@ -335,13 +385,12 @@ Structure your report as:
 2. PROCESSES NEEDING DX
 3. HIGHEST IMPACT OPPORTUNITY
 4. RECOMMENDED DX APPROACH
-   (Hardware/Software/Data/Marketing)
 5. QUICK WINS (next 30 days)
 6. STRATEGIC ACTIONS (6 months)
 
 Be concise and board-level professional!
 """
-                            }])
+                                }]))
 
                         report = message.content[
                             0].text
@@ -353,50 +402,48 @@ Be concise and board-level professional!
 **Dataset:** {df.shape[0]} rows,
 {df.shape[1]} columns
 
-**Key Observations:**
-- {len(num_cols)} numeric columns found
-- Missing values: {df.isnull().sum().sum()}
-- Ready for DXPO analysis!
+**Observations:**
+- {len(num_cols)} numeric columns
+- Missing: {df.isnull().sum().sum()}
 
-*Note: Connect API key for full
-AI-powered recommendations*
+*Connect API key for full AI report*
 """
 
-                    # Show report
                     st.markdown("---")
                     st.subheader(
                         "🪄 DXPO Magic Box Report")
                     st.markdown(report)
 
-                    # Download buttons
                     col1, col2 = st.columns(2)
                     with col1:
                         st.download_button(
                             label="📥 Download Report",
                             data=report,
-                            file_name="DXPO_Report.txt",
+                            file_name=(
+                                "DXPO_Report.txt"),
                             mime="text/plain",
                             use_container_width=True)
                     with col2:
                         csv = df.to_csv(index=False)
                         st.download_button(
-                            label="📥 Download Clean Data",
+                            label=(
+                                "📥 Download Clean Data"),
                             data=csv,
-                            file_name="cleaned_data.csv",
+                            file_name=(
+                                "cleaned_data.csv"),
                             mime="text/csv",
                             use_container_width=True)
 
-                    st.success(
-                        "✅ Analysis complete!")
+                    st.success("✅ Analysis complete!")
                     st.balloons()
 
         except Exception as e:
-            st.error(f"❌ Error loading file: {e}")
+            st.error(f"❌ Error: {e}")
 
 # ── FOOTER ──
 st.markdown("---")
 st.caption(
-    "🪄 DXPO AI Magic Box | "
+    "DXPO AI Magic Box | "
     "Dr. Jay Rajasekera | "
     "Tokyo International University | "
     "Powered by Claude AI")
