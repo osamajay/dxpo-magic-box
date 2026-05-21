@@ -13,8 +13,7 @@ Original file is located at
 # Run this every session!!
 # ============================================
 
-# Install
-!pip install anthropic plotly -q
+# Install !pip install anthropic plotly -q
 
 # Imports
 import pandas as pd
