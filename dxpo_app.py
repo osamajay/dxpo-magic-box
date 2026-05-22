@@ -13,7 +13,7 @@ Original file is located at
 # Run this every session!!
 # ============================================
 
-# Install 
+# Install
 
 # Imports
 import pandas as pd
@@ -26,8 +26,7 @@ warnings.filterwarnings('ignore')
 
 # API connection
 
-#api_key = userdata.get('ANTHROPIC_API_KEY')
-api_key = os.environ.get('ANTHROPIC_API_KEY','')
+api_key = userdata.get('ANTHROPIC_API_KEY')
 client = anthropic.Anthropic(api_key=api_key)
 
 print("=" * 45)
@@ -47,7 +46,7 @@ print("=" * 45)
 # ============================================
 
 # Install libraries
-
+!pip install anthropic plotly kaleido -q
 
 # Import all
 import pandas as pd
@@ -55,12 +54,11 @@ import numpy as np
 from scipy import stats
 import plotly.graph_objects as go
 import anthropic
-import os
 import warnings
 warnings.filterwarnings('ignore')
 
 # Connect API
-from google.colab import userdata, files
+
 api_key = userdata.get('ANTHROPIC_API_KEY')
 client = anthropic.Anthropic(api_key=api_key)
 
@@ -769,7 +767,7 @@ print("🎯 Ready for Plotly Objects!!")
 # ============================================
 
 import plotly.graph_objects as go
-from google.colab import files
+
 
 # ── OBJECT 3: Impact Table ──
 processes = [p['pain_point']
@@ -1668,17 +1666,406 @@ print("→ Plotly Impact Table")
 print("→ Download buttons")
 print("→ Claude DXPO Report")
 
-from google.colab import files
 import os
 
 # Verify file exists first
 if os.path.exists('dxpo_app.py'):
     size = os.path.getsize('dxpo_app.py')
     print(f"✅ File found: {size:,} bytes")
-    files.download('dxpo_app.py')
+   
     print("📥 Download started!")
     print("Check your Downloads folder!")
 else:
     print("⚠️  File not found!")
     print("Need to run the creation cell again!")
+
+# Write clean dxpo_app.py for Streamlit
+app_code = """
+import streamlit as st
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
+import anthropic
+import os
+import warnings
+warnings.filterwarnings("ignore")
+
+st.set_page_config(
+    page_title="DXPO AI Magic Box",
+    page_icon="🪄",
+    layout="wide"
+)
+
+st.title("DXPO AI Magic Box")
+st.subheader(
+    "Dr. Jay Rajasekera | "
+    "Tokyo International University")
+st.markdown("---")
+
+# File upload
+st.subheader("📂 Upload Your Data")
+uploaded_file = st.file_uploader(
+    "Upload Excel or CSV file",
+    type=["xlsx","xls","xlsm","csv"])
+
+if uploaded_file is not None:
+    try:
+        if uploaded_file.name.endswith(".csv"):
+            df = pd.read_csv(uploaded_file)
+        else:
+            xl = pd.ExcelFile(uploaded_file)
+            sheets = xl.sheet_names
+            if len(sheets) > 1:
+                sheet = st.selectbox(
+                    "Select sheet:", sheets)
+            else:
+                sheet = sheets[0]
+            df = pd.read_excel(
+                uploaded_file,
+                sheet_name=sheet)
+
+        st.success(f"✅ Loaded: {uploaded_file.name}")
+
+        col1,col2,col3 = st.columns(3)
+        with col1:
+            st.metric("Rows", f"{df.shape[0]:,}")
+        with col2:
+            st.metric("Columns", df.shape[1])
+        with col3:
+            st.metric("Missing",
+                df.isnull().sum().sum())
+
+        with st.expander("👀 Preview Data"):
+            st.dataframe(df.head(10),
+                use_container_width=True)
+
+        st.markdown("---")
+        st.subheader("🏥 DXPO DOC Interview")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            industry = st.radio(
+                "Q1: Your industry?",
+                ["🛒 Retail/E-commerce",
+                 "🏭 Manufacturing",
+                 "💰 Financial Services",
+                 "🏥 Healthcare",
+                 "🚚 Logistics/Supply Chain",
+                 "🔧 Other"])
+
+            concern_options = [
+                "📉 Revenue declining",
+                "💸 Costs too high",
+                "👥 Losing customers/churn",
+                "⏱️ Processes too slow",
+                "🔍 Cannot identify best customers",
+                "📢 Marketing not effective"]
+
+            concern_primary = st.selectbox(
+                "Q2: PRIMARY concern:",
+                concern_options)
+
+            concern_secondary = st.selectbox(
+                "Q2: SECONDARY concern:",
+                ["None"] + concern_options)
+
+        with col2:
+            dept_options = [
+                "📊 Sales & Marketing",
+                "⚙️ Operations",
+                "💹 Finance",
+                "🤝 Customer Service",
+                "🏢 All equally"]
+
+            dept_primary = st.selectbox(
+                "Q3: PRIMARY department:",
+                dept_options)
+
+            dept_secondary = st.selectbox(
+                "Q3: SECONDARY department:",
+                ["None"] + dept_options)
+
+            data_age = st.radio(
+                "Q4: Data recency?",
+                ["📅 Last 3 months",
+                 "📆 Last 1 year",
+                 "🗓️ Last 3 years",
+                 "📂 More than 3 years",
+                 "❓ Not sure"])
+
+            dx_history = st.radio(
+                "Q5: Previous DX attempts?",
+                ["🆕 No — first attempt",
+                 "❌ Previous attempts failed",
+                 "⚡ Partial success",
+                 "🔄 In progress"])
+
+        st.markdown("---")
+
+        if st.button(
+            "🔬 Run Marketing Dokku + "
+            "Generate DXPO Report!!",
+            type="primary",
+            use_container_width=True):
+
+            with st.spinner(
+                "🪄 Analyzing... Please wait..."):
+
+                amt_cols = [
+                    c for c in df.columns
+                    if "-Amt" in c or
+                    "Amt" in c or
+                    "amount" in c.lower()]
+
+                if not amt_cols:
+                    amt_cols = [
+                        c for c in
+                        df.select_dtypes(
+                        include=[np.number]
+                        ).columns
+                        if "id" not in c.lower()]
+
+                df["Total-Amt"] = (
+                    df[amt_cols].sum(axis=1))
+                n = len(df)
+                pain_points = []
+
+                status_col = None
+                for c in df.columns:
+                    if "status" in c.lower():
+                        status_col = c
+                        break
+
+                internet_col = None
+                for c in df.columns:
+                    if "internet" in c.lower():
+                        internet_col = c
+                        break
+
+                if status_col:
+                    inactive = (
+                        df[status_col]=="Inactive"
+                        ).sum()
+                    inactive_pct = inactive/n*100
+                    active_spend = df[
+                        df[status_col]=="Active"][
+                        "Total-Amt"].mean()
+                    inactive_spend = df[
+                        df[status_col]=="Inactive"][
+                        "Total-Amt"].mean()
+
+                    if inactive_pct > 15:
+                        pain_points.append({
+                            "test":"Customer Retention",
+                            "finding":f"{inactive_pct:.1f}% inactive",
+                            "flag":"🟡 YELLOW"})
+
+                if internet_col:
+                    internet_pct = (
+                        df[internet_col]>0
+                        ).sum()/n*100
+                    if internet_pct < 10:
+                        pain_points.append({
+                            "test":"Digital Channel Gap",
+                            "finding":f"Only {internet_pct:.1f}% online",
+                            "flag":"🔴 RED"})
+
+                rev_by_prod = {
+                    c.replace("-Amt",""):
+                    df[c].sum()
+                    for c in amt_cols}
+                total_rev = sum(
+                    rev_by_prod.values())
+                sorted_prods = sorted(
+                    rev_by_prod.items(),
+                    key=lambda x: x[1],
+                    reverse=True)
+                top_pct = (
+                    sorted_prods[0][1]/
+                    total_rev*100)
+                finding = (
+                    "Top 3: " +
+                    ", ".join([
+                        f"{p}({r/total_rev*100:.1f}%)"
+                        for p,r in sorted_prods[:3]]))
+                if top_pct > 25:
+                    pain_points.append({
+                        "test":"Revenue Concentration",
+                        "finding": finding,
+                        "flag":"🟡 YELLOW"})
+
+                st.markdown("---")
+                st.subheader("🔬 Marketing Dokku Results")
+
+                for p in pain_points:
+                    st.write(
+                        f"{p['flag']} "
+                        f"**{p['test']}**: "
+                        f"{p['finding']}")
+
+                st.markdown("---")
+                st.subheader("🎯 Impact Scoring")
+
+                impact_scores = []
+                for i, p in enumerate(
+                        pain_points, 1):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        a = st.slider(
+                            f"A — Value: {p['test']}",
+                            1, 10, 7,
+                            key=f"a_{i}")
+                    with col2:
+                        b = st.slider(
+                            f"B — Potential: {p['test']}",
+                            1, 10, 5,
+                            key=f"b_{i}")
+                    impact_scores.append({
+                        "pain_point": p["test"],
+                        "finding"   : p["finding"],
+                        "flag"      : p["flag"],
+                        "customer_value": a,
+                        "implementation_potential": b,
+                        "impact"    : a*b
+                    })
+
+                impact_scores.sort(
+                    key=lambda x: x["impact"],
+                    reverse=True)
+                for i,p in enumerate(
+                        impact_scores,1):
+                    p["rank"] = i
+
+                processes = [p["pain_point"]
+                    for p in impact_scores]
+                a_vals = [p["customer_value"]
+                    for p in impact_scores]
+                b_vals = [p["implementation_potential"]
+                    for p in impact_scores]
+                impacts = [p["impact"]
+                    for p in impact_scores]
+                ranks = [f"#{p['rank']}"
+                    for p in impact_scores]
+                colors = [
+                    "#2ECC71" if i>=70 else
+                    "#F39C12" if i>=50 else
+                    "#E74C3C"
+                    for i in impacts]
+
+                fig = go.Figure(data=[
+                    go.Table(
+                        header=dict(
+                            values=[
+                                "<b>Pain Point</b>",
+                                "<b>A</b>",
+                                "<b>B</b>",
+                                "<b>Impact</b>",
+                                "<b>Rank</b>"],
+                            fill_color="#1B3A6B",
+                            font=dict(
+                                color="white",
+                                size=12),
+                            align="center"),
+                        cells=dict(
+                            values=[
+                                processes,
+                                a_vals,
+                                b_vals,
+                                impacts,
+                                ranks],
+                            fill_color=[
+                                ["#F8F9FA"]*len(processes),
+                                ["#EBF5FB"]*len(processes),
+                                ["#EBF5FB"]*len(processes),
+                                colors,
+                                ["#F8F9FA"]*len(processes)],
+                            font=dict(
+                                color=[
+                                    ["#1B3A6B"]*len(processes),
+                                    ["#1B3A6B"]*len(processes),
+                                    ["#1B3A6B"]*len(processes),
+                                    ["white"]*len(processes),
+                                    ["#1B3A6B"]*len(processes)],
+                                size=12),
+                            align="center",
+                            height=35))])
+
+                fig.update_layout(
+                    title=dict(
+                        text="🎯 DXPO Impact Table",
+                        x=0.5),
+                    height=300,
+                    margin=dict(l=10,r=10,t=60,b=10))
+
+                st.plotly_chart(
+                    fig,
+                    use_container_width=True)
+
+                summary = f"Company: {industry}\\n"
+                for p in impact_scores:
+                    summary += (
+                        f"#{p['rank']} "
+                        f"{p['pain_point']}: "
+                        f"Impact={p['impact']}/100\\n")
+
+                try:
+                    api_key = os.environ.get(
+                        "ANTHROPIC_API_KEY","")
+                    client = anthropic.Anthropic(
+                        api_key=api_key)
+                    message = client.messages.create(
+                        model="claude-opus-4-5",
+                        max_tokens=1500,
+                        messages=[{
+                            "role":"user",
+                            "content":f\"\"\"
+You are DXPO AI Magic Box by
+Dr. Jay Rajasekera,
+Tokyo International University.
+
+Generate professional DXPO report:
+{summary}
+
+Include:
+1. EXECUTIVE SUMMARY
+2. TOP 3 PAIN POINTS
+3. RECOMMENDED DX APPROACH
+4. QUICK WINS (30 days)
+5. STRATEGIC ROADMAP (6 months)
+\"\"\"}])
+                    report = message.content[0].text
+                except Exception as e:
+                    report = f"API Error: {e}"
+
+                st.markdown("---")
+                st.subheader("🪄 DXPO Report")
+                st.markdown(report)
+
+                st.download_button(
+                    "📥 Download Report",
+                    report,
+                    "DXPO_Report.txt",
+                    use_container_width=True)
+
+                st.success("✅ Analysis complete!!")
+                st.balloons()
+
+    except Exception as e:
+        st.error(f"❌ Error: {e}")
+
+st.markdown("---")
+st.caption(
+    "🪄 DXPO AI Magic Box | "
+    "Dr. Jay Rajasekera | "
+    "Tokyo International University | "
+    "Powered by Claude AI")
+"""
+
+with open('dxpo_app.py', 'w') as f:
+    f.write(app_code)
+
+print("✅ Clean dxpo_app.py created!")
+print("   No !pip install")
+print("   No google.colab imports")
+print("   Uses os.environ for API key")
 
