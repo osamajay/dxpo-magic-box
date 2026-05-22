@@ -46,7 +46,7 @@ print("=" * 45)
 # ============================================
 
 # Install libraries
-!pip install anthropic plotly kaleido -q
+
 
 # Import all
 import pandas as pd
