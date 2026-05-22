@@ -25,8 +25,9 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # API connection
-from google.colab import userdata, files
-api_key = userdata.get('ANTHROPIC_API_KEY')
+
+#api_key = userdata.get('ANTHROPIC_API_KEY')
+api_key = os.environ.get('ANTHROPIC_API_KEY','')
 client = anthropic.Anthropic(api_key=api_key)
 
 print("=" * 45)
