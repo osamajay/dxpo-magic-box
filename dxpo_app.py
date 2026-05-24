@@ -130,6 +130,30 @@ if uploaded_file is not None:
 
         st.markdown("---")
 
+        # ── DXPO DOC SUMMARY BOX ──
+        st.subheader("📋 DXPO DOC Summary")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.info(f"""
+**🏭 Industry:** {industry}
+
+**🎯 Primary Concern:** {concern_primary}
+
+**🎯 Secondary Concern:** {concern_secondary}
+
+**📊 Primary Dept:** {dept_primary}
+
+**📊 Secondary Dept:** {dept_secondary}
+            """)
+        with col2:
+            st.info(f"""
+**📅 Data Age:** {data_age}
+
+**🔄 DX History:** {dx_history}
+            """)
+
+        st.markdown("---")
+
         # ── STEP 3: RUN ANALYSIS ──
         if st.button(
             "🔬 Run Marketing Dokku + "
@@ -535,7 +559,7 @@ if uploaded_file is not None:
                         messages=[{
                             "role":"user",
                             "content":
-                            f"""
+                            f\"\"\"
 You are DXPO AI Magic Box by
 Dr. Jay Rajasekera,
 Tokyo International University.
@@ -549,7 +573,7 @@ Include:
 3. RECOMMENDED DX APPROACH
 4. QUICK WINS (30 days)
 5. STRATEGIC ROADMAP
-"""
+\"\"\"
                         }]))
                     report = (
                         message.content[0].text)
