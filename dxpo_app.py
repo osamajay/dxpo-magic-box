@@ -549,7 +549,7 @@ Include:
 3. RECOMMENDED DX APPROACH
 4. QUICK WINS (30 days)
 5. STRATEGIC ROADMAP
-\"\"\"
+"""
                         }]))
                     report = (
                         message.content[0].text)
