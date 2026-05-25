@@ -679,7 +679,7 @@ if uploaded_file is not None:
                         messages=[{
                             "role":"user",
                             "content":
-                            f\"\"\"
+                            """
 You are DXPO AI Magic Box by
 Dr. Jay Rajasekera,
 Tokyo International University.
