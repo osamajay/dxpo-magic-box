@@ -331,11 +331,155 @@ if uploaded_file is not None:
                         "🟡 YELLOW Monitor",
                         len(yel_pts))
 
+                # ── COMPLETE RESULTS TABLE ──
+                st.markdown("### 📊 Marketing Dokku — Complete Test Results")
+                st.caption("All tests run · Standard + Adaptive · Based on YOUR interview!!")
+
+                # Build complete test results
+                all_tests = [
+                    {
+                        "test": "Customer Retention",
+                        "type": "Standard",
+                        "finding": f"{inactive_pct:.1f}% inactive · ${spend_gap:,.0f} gap"
+                                   if status_col else "No status column detected",
+                        "flag": next((p["flag"] for p in pain_points
+                                     if p["test"]=="Customer Retention"),
+                                    "🟢 GREEN")
+                    },
+                    {
+                        "test": "Digital Channel Gap",
+                        "type": "Standard",
+                        "finding": f"Only {internet_pct:.1f}% ordering online"
+                                   if internet_col else "No channel data detected",
+                        "flag": next((p["flag"] for p in pain_points
+                                     if p["test"]=="Digital Channel Gap"),
+                                    "🟢 GREEN")
+                    },
+                    {
+                        "test": "Revenue Concentration",
+                        "type": "Standard",
+                        "finding": finding,
+                        "flag": next((p["flag"] for p in pain_points
+                                     if p["test"]=="Revenue Concentration"),
+                                    "🟢 GREEN")
+                    },
+                    {
+                        "test": "Cross-sell Penetration",
+                        "type": "Standard",
+                        "finding": f"{(df['Total-Amt']>0).sum()/n*100:.1f}% active buyers",
+                        "flag": "🟢 GREEN"
+                    },
+                ]
+
+                # Add adaptive tests
                 for p in pain_points:
-                    st.write(
-                        f"{p['flag']} "
-                        f"**{p['test']}**: "
-                        f"{p['finding']}")
+                    if p["test"] not in [
+                        t["test"] for t in all_tests]:
+                        all_tests.append({
+                            "test": p["test"],
+                            "type": "Adaptive",
+                            "finding": p["finding"],
+                            "flag": p["flag"]
+                        })
+
+                # Build Plotly table
+                test_names = [t["test"]
+                    for t in all_tests]
+                test_types = [t["type"]
+                    for t in all_tests]
+                test_findings = [t["finding"]
+                    for t in all_tests]
+                test_flags = [t["flag"]
+                    for t in all_tests]
+
+                row_colors = []
+                for t in all_tests:
+                    if "RED" in t["flag"]:
+                        row_colors.append("#FDEDEC")
+                    elif "YELLOW" in t["flag"]:
+                        row_colors.append("#FEF9E7")
+                    else:
+                        row_colors.append("#EAFAF1")
+
+                fig_tests = go.Figure(data=[
+                    go.Table(
+                        columnwidth=[
+                            180, 80, 300, 100],
+                        header=dict(
+                            values=[
+                                "<b>Test</b>",
+                                "<b>Type</b>",
+                                "<b>Finding</b>",
+                                "<b>Status</b>"],
+                            fill_color="#1B3A6B",
+                            font=dict(
+                                color="white",
+                                size=12),
+                            align="center",
+                            height=40),
+                        cells=dict(
+                            values=[
+                                test_names,
+                                test_types,
+                                test_findings,
+                                test_flags],
+                            fill_color=[
+                                row_colors,
+                                row_colors,
+                                row_colors,
+                                row_colors],
+                            font=dict(
+                                color="#1B3A6B",
+                                size=11),
+                            align=["left",
+                                   "center",
+                                   "left",
+                                   "center"],
+                            height=35))])
+
+                fig_tests.update_layout(
+                    title=dict(
+                        text="🔬 Marketing Dokku — All Test Results",
+                        x=0.5,
+                        font=dict(
+                            size=14,
+                            color="#1B3A6B")),
+                    height=300,
+                    margin=dict(
+                        l=10,r=10,t=60,b=10))
+
+                st.plotly_chart(fig_tests,
+                    use_container_width=True)
+
+                # Download button
+                fig_tests.write_html(
+                    "dokku_results.html")
+                with open(
+                    "dokku_results.html",
+                    "rb") as f_html:
+                    st.download_button(
+                        "📥 Download Dokku Results",
+                        f_html,
+                        "DXPO_DukkuResults.html",
+                        use_container_width=True)
+
+                # Pain points summary
+                st.markdown("---")
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric(
+                        "🔴 RED Critical",
+                        len(red_pts))
+                with col2:
+                    st.metric(
+                        "🟡 YELLOW Monitor",
+                        len(yel_pts))
+                with col3:
+                    st.metric(
+                        "🟢 GREEN Healthy",
+                        len(all_tests) -
+                        len(red_pts) -
+                        len(yel_pts))
 
                 # Pain Point Chart
                 pain_names = [
