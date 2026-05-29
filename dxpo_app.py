@@ -361,7 +361,7 @@ if uploaded_file is not None:
                                  "🟢 GREEN")},
                     {"label": "TEST 4",
                      "name": "Cross-sell Penetration",
-                     "finding": f"Single buyers: {(df['Products-Bought']==1).sum()/n*100:.1f}%",
+                     "finding": f"Single buyers: {((df[amt_cols]>0).sum(axis=1)==1).sum()/n*100:.1f}%",
                      "flag": "🟢 GREEN"},
                 ]
 
