@@ -331,6 +331,69 @@ if uploaded_file is not None:
                         "🟡 YELLOW Monitor",
                         len(yel_pts))
 
+                # ── TEST DETAILS ──
+                st.markdown(
+                    "### 🔬 Marketing Dokku — Test Details")
+                st.caption(
+                    "Standard + Adaptive tests · "
+                    "Based on YOUR interview!!")
+
+                test_details = [
+                    {"label": "TEST 1",
+                     "name": "Customer Retention",
+                     "finding": f"{inactive_pct:.1f}% inactive · ${spend_gap:,.0f} gap"
+                                if status_col else "No status column",
+                     "flag": next((p["flag"] for p in pain_points
+                                  if p["test"]=="Customer Retention"),
+                                 "🟢 GREEN")},
+                    {"label": "TEST 2",
+                     "name": "Digital Channel Gap",
+                     "finding": f"Internet orders: {internet_pct:.1f}%"
+                                if internet_col else "No channel data",
+                     "flag": next((p["flag"] for p in pain_points
+                                  if p["test"]=="Digital Channel Gap"),
+                                 "🟢 GREEN")},
+                    {"label": "TEST 3",
+                     "name": "Revenue Concentration",
+                     "finding": finding,
+                     "flag": next((p["flag"] for p in pain_points
+                                  if p["test"]=="Revenue Concentration"),
+                                 "🟢 GREEN")},
+                    {"label": "TEST 4",
+                     "name": "Cross-sell Penetration",
+                     "finding": f"Single buyers: {(df['Products-Bought']==1).sum()/n*100:.1f}%",
+                     "flag": "🟢 GREEN"},
+                ]
+
+                # Add adaptive tests
+                for p in pain_points:
+                    if p["test"] not in [
+                        t["name"] for t in test_details]:
+                        test_details.append({
+                            "label": "A-TEST",
+                            "name": p["test"],
+                            "finding": p["finding"],
+                            "flag": p["flag"]
+                        })
+
+                # Display each test
+                for t in test_details:
+                    if "RED" in t["flag"]:
+                        icon = "🔴"
+                    elif "YELLOW" in t["flag"]:
+                        icon = "🟡"
+                    else:
+                        icon = "🟢"
+
+                    st.markdown(
+                        f"**{icon} {t['label']}: "
+                        f"{t['name']}**")
+                    st.write(
+                        f"  📋 {t['finding']}")
+                    st.write(
+                        f"  Status: {t['flag']}")
+                    st.markdown("---")
+
                 # ── COMPLETE RESULTS TABLE ──
                 st.markdown("### 📊 Marketing Dokku — Complete Test Results")
                 st.caption("All tests run · Standard + Adaptive · Based on YOUR interview!!")
