@@ -154,6 +154,106 @@ if uploaded_file is not None:
 
         st.markdown("---")
 
+        # ── STEP 2B: OPTIONAL QUESTIONS ──
+        st.subheader(
+            "🔬 Step 2B — Optional Questions")
+        st.caption(
+            "Like Ningendokku premium package!! "
+            "Answer for deeper analysis — "
+            "or skip to proceed!!")
+
+        show_optional = st.checkbox(
+            "✅ Yes — I want deeper analysis "
+            "(answer optional questions)",
+            value=False)
+
+        opt_context = {}
+
+        if show_optional:
+            st.info(
+                "These optional questions "
+                "trigger additional targeted "
+                "tests specific to your "
+                "business context!!")
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                opt_competitors = st.selectbox(
+                    "OPT-Q1: Main competitors?",
+                    ["Not answered",
+                     "Domestic only",
+                     "Global competitors",
+                     "Both domestic + global"])
+
+                opt_size = st.selectbox(
+                    "OPT-Q2: Company size?",
+                    ["Not answered",
+                     "SME (under 100 staff)",
+                     "Mid-size (100-1000)",
+                     "Large (over 1000)"])
+
+                opt_digital = st.selectbox(
+                    "OPT-Q3: Current digital tools?",
+                    ["Not answered",
+                     "None — paper based",
+                     "Basic (Excel only)",
+                     "Some (CRM/ERP)",
+                     "Advanced (AI/Analytics)"])
+
+            with col2:
+                opt_budget = st.selectbox(
+                    "OPT-Q4: DX budget available?",
+                    ["Not answered",
+                     "Limited (under $10K)",
+                     "Moderate ($10K-$100K)",
+                     "Significant (over $100K)"])
+
+                opt_timeline = st.selectbox(
+                    "OPT-Q5: Implementation timeline?",
+                    ["Not answered",
+                     "Urgent (within 3 months)",
+                     "Normal (3-6 months)",
+                     "Long term (over 6 months)"])
+
+                opt_data_freq = st.selectbox(
+                    "OPT-Q6: How often is data updated?",
+                    ["Not answered",
+                     "Real-time / Daily",
+                     "Weekly / Monthly",
+                     "Quarterly / Annual",
+                     "Irregular"])
+
+            opt_context = {
+                "competitors" : opt_competitors,
+                "company_size": opt_size,
+                "digital_tools": opt_digital,
+                "dx_budget"   : opt_budget,
+                "timeline"    : opt_timeline,
+                "data_freq"   : opt_data_freq
+            }
+
+            # Show optional summary
+            answered = {k:v for k,v in
+                opt_context.items()
+                if v != "Not answered"}
+
+            if answered:
+                st.success(
+                    f"✅ {len(answered)} optional "
+                    f"questions answered!! "
+                    f"Deeper analysis enabled!!")
+            else:
+                st.warning(
+                    "⚠️  No optional questions "
+                    "answered yet!!")
+        else:
+            st.info(
+                "💡 Skipping optional questions — "
+                "standard analysis will run!!")
+
+        st.markdown("---")
+
         # ── STEP 3: RUN ANALYSIS ──
         if st.button(
             "🔬 Run Marketing Dokku + "
