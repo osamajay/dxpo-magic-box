@@ -377,22 +377,100 @@ if uploaded_file is not None:
                         })
 
                 # Display each test
+                # with enhanced descriptions
                 for t in test_details:
                     if "RED" in t["flag"]:
                         icon = "🔴"
+                        urgency = "CRITICAL — Action needed!!"
                     elif "YELLOW" in t["flag"]:
                         icon = "🟡"
+                        urgency = "MONITOR — Watch carefully!!"
                     else:
                         icon = "🟢"
+                        urgency = "HEALTHY — No action needed!!"
 
-                    st.markdown(
-                        f"**{icon} {t['label']}: "
-                        f"{t['name']}**")
-                    st.write(
-                        f"  📋 {t['finding']}")
-                    st.write(
-                        f"  Status: {t['flag']}")
-                    st.markdown("---")
+                    # Why tested
+                    why = {
+                        "TEST 1": "Standard test — "
+                            "Customer retention is a "
+                            "core metric for ALL "
+                            "retail businesses!!",
+                        "TEST 2": "Standard test — "
+                            "Digital channel adoption "
+                            "is critical for modern "
+                            "retail competitiveness!!",
+                        "TEST 3": "Standard test — "
+                            "Revenue concentration "
+                            "measures business risk "
+                            "from product dependency!!",
+                        "TEST 4": "Standard test — "
+                            "Cross-sell penetration "
+                            "measures how well products "
+                            "complement each other!!",
+                        "A-TEST": "Adaptive test — "
+                            "Triggered by YOUR interview "
+                            "answer about customer "
+                            "concerns!!"
+                    }
+
+                    with st.expander(
+                        f"{icon} {t['label']}: "
+                        f"{t['name']} — "
+                        f"{t['flag']}",
+                        expanded=True):
+
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.markdown(
+                                "**📋 Finding:**")
+                            st.write(t["finding"])
+                            st.markdown(
+                                "**🎯 Urgency:**")
+                            st.write(urgency)
+                        with col2:
+                            st.markdown(
+                                "**❓ Why Tested:**")
+                            st.write(
+                                why.get(
+                                    t["label"],
+                                    "Adaptive test "
+                                    "triggered by "
+                                    "your interview!!"))
+
+                        st.markdown(
+                            "**📊 Statistical Note:**")
+                        if t["label"] == "TEST 1":
+                            st.write(
+                                f"Threshold: >15% inactive "
+                                f"= YELLOW · >30% = RED · "
+                                f"Your rate: "
+                                f"{inactive_pct:.1f}%")
+                        elif t["label"] == "TEST 2":
+                            st.write(
+                                f"Threshold: <25% online "
+                                f"= YELLOW · <10% = RED · "
+                                f"Your rate: "
+                                f"{internet_pct:.1f}%")
+                        elif t["label"] == "TEST 3":
+                            st.write(
+                                f"Threshold: >25% in one "
+                                f"product = YELLOW · "
+                                f">40% = RED · "
+                                f"Your top product: "
+                                f"{top_pct:.1f}%")
+                        elif t["label"] == "TEST 4":
+                            st.write(
+                                f"Threshold: >60% single "
+                                f"buyers = RED · "
+                                f">40% = YELLOW · "
+                                f"Healthy = GREEN")
+                        elif t["label"] == "A-TEST":
+                            st.write(
+                                f"Adaptive threshold: "
+                                f"Inactive spend < 60% "
+                                f"of active = RED · "
+                                f"Your ratio: "
+                                f"{inactive_spend/active_spend*100:.1f}%")
 
                 # ── COMPLETE RESULTS TABLE ──
                 st.markdown("### 📊 Marketing Dokku — Complete Test Results")
