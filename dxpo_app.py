@@ -179,6 +179,16 @@ if uploaded_file is not None:
             col1, col2 = st.columns(2)
 
             with col1:
+                opt_country = st.selectbox(
+                    "OPT-Q0: Country/Region?",
+                    ["Not answered",
+                     "🇯🇵 Japan",
+                     "🌏 Southeast Asia",
+                     "🌏 South Asia",
+                     "🌏 East Asia",
+                     "🌍 Middle East",
+                     "🌐 Global"])
+
                 opt_competitors = st.selectbox(
                     "OPT-Q1: Main competitors?",
                     ["Not answered",
@@ -225,6 +235,7 @@ if uploaded_file is not None:
                      "Irregular"])
 
             opt_context = {
+                "country"     : opt_country,
                 "competitors" : opt_competitors,
                 "company_size": opt_size,
                 "digital_tools": opt_digital,
@@ -430,6 +441,84 @@ if uploaded_file is not None:
                     st.metric(
                         "🟡 YELLOW Monitor",
                         len(yel_pts))
+
+                # ── OPTIONAL TRIGGERED TESTS ──
+                if opt_context:
+                    opt_pain = []
+
+                    # Digital Maturity Test
+                    if opt_context.get(
+                        "digital_tools") in [
+                        "None — paper based",
+                        "Basic (Excel only)"]:
+                        opt_pain.append({
+                            "test": "Digital Maturity Gap",
+                            "finding": f"Current tools: {opt_context.get('digital_tools')} — significant DX opportunity!!",
+                            "flag": "🔴 RED",
+                            "type": "Optional"})
+
+                    # Budget vs Urgency Test
+                    if (opt_context.get("timeline")
+                        == "Urgent (within 3 months)"
+                        and opt_context.get("dx_budget")
+                        == "Limited (under $10K)"):
+                        opt_pain.append({
+                            "test": "Budget-Urgency Mismatch",
+                            "finding": "Urgent timeline but limited budget — risk of failed implementation!!",
+                            "flag": "🔴 RED",
+                            "type": "Optional"})
+
+                    # Data Freshness Test
+                    if opt_context.get(
+                        "data_freq") in [
+                        "Quarterly / Annual",
+                        "Irregular"]:
+                        opt_pain.append({
+                            "test": "Data Freshness Risk",
+                            "finding": f"Data updated {opt_context.get('data_freq')} — insights may be outdated!!",
+                            "flag": "🟡 YELLOW",
+                            "type": "Optional"})
+
+                    # Competitive Risk Test
+                    if opt_context.get(
+                        "competitors") in [
+                        "Global competitors",
+                        "Both domestic + global"]:
+                        opt_pain.append({
+                            "test": "Global Competition Risk",
+                            "finding": f"Facing global competitors with only {internet_pct:.1f}% digital orders — critical gap!!",
+                            "flag": "🔴 RED",
+                            "type": "Optional"})
+
+                    if opt_pain:
+                        st.markdown("---")
+                        st.markdown(
+                            "### 🔬 Optional Tests — "
+                            "Triggered by Your Answers")
+                        st.caption(
+                            "These tests ran because "
+                            "of your Step 2B answers!!")
+
+                        for p in opt_pain:
+                            if "RED" in p["flag"]:
+                                icon = "🔴"
+                            else:
+                                icon = "🟡"
+                            st.markdown(
+                                f"**{icon} {p['test']}**")
+                            st.write(
+                                f"📋 {p['finding']}")
+                            st.write(
+                                f"Status: {p['flag']}")
+                            st.markdown("---")
+
+                        # Add to pain points
+                        pain_points.extend(opt_pain)
+
+                        st.success(
+                            f"✅ {len(opt_pain)} additional "
+                            f"pain points found from "
+                            f"optional questions!!")
 
                 # ── TEST DETAILS ──
                 st.markdown(
