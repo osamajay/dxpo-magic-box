@@ -380,12 +380,15 @@ if uploaded_file is not None:
                     reverse=True)
                 top_pct = (
                     sorted_prods[0][1]/
-                    total_rev*100)
+                    total_rev*100
+                    if sorted_prods else 0)
                 finding = ("Top 3: " +
                     ", ".join([
                         f"{p}({r/total_rev*100:.1f}%)"
                         for p,r in
-                        sorted_prods[:3]]))
+                        sorted_prods[:3]])
+                    if sorted_prods else
+                    "No revenue data found")
                 if top_pct > 25:
                     flag = ("🔴 RED"
                         if top_pct > 40
