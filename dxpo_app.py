@@ -12,7 +12,7 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header
+# Header Jun 21, 2026-->dxpo_app (27) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
@@ -62,1016 +62,1082 @@ if uploaded_file is not None:
 
         st.markdown("---")
 
-        # ── STEP 2: DXPO DOC ──
+        # ── STEP 0: PRE-VISIT QUESTIONNAIRE ──
         st.subheader(
-            "🏥 Step 2 — DXPO DOC Interview")
+            "📝 Step 0 — Pre-Visit Questionnaire")
         st.caption(
-            "Like Ningendokku — "
-            "we listen first!!")
+            "Like the Ningendokku pre-visit form — "
+            "tell us where it hurts before we run "
+            "any tests!!")
+
+        st.markdown(
+            "Select the area(s) you're most "
+            "concerned about:")
 
         col1, col2 = st.columns(2)
-
         with col1:
-            industry = st.radio(
-                "Q1: Your industry?",
-                ["🛒 Retail/E-commerce",
-                 "🏭 Manufacturing",
-                 "💰 Financial Services",
-                 "🏥 Healthcare",
-                 "🚚 Logistics/Supply Chain",
-                 "🔧 Other"])
-
-            concern_opts = [
-                "📉 Revenue declining",
-                "💸 Costs too high",
-                "👥 Losing customers/churn",
-                "⏱️ Processes too slow",
-                "🔍 Cannot identify best customers",
-                "📢 Marketing not effective"]
-
-            concern_primary = st.selectbox(
-                "Q2: PRIMARY concern:",
-                concern_opts)
-
-            concern_secondary = st.selectbox(
-                "Q2: SECONDARY concern:",
-                ["None"] + concern_opts)
-
+            concern_hr = st.checkbox(
+                "👥 HR / Workforce efficiency")
+            concern_kpi = st.checkbox(
+                "📊 Not using data to drive KPIs")
+            concern_quality = st.checkbox(
+                "🏭 Product Quality Problems")
         with col2:
-            dept_opts = [
-                "📊 Sales & Marketing",
-                "⚙️ Operations",
-                "💹 Finance",
-                "🤝 Customer Service",
-                "🏢 All equally"]
+            concern_marketing = st.checkbox(
+                "🛒 Customer / Marketing")
+            concern_ops = st.checkbox(
+                "🚚 Supply chain / Operations")
+            concern_finance = st.checkbox(
+                "💰 Finance")
 
-            dept_primary = st.selectbox(
-                "Q3: PRIMARY department:",
-                dept_opts)
+        concern_areas = []
+        if concern_hr:
+            concern_areas.append(
+                "HR / Workforce efficiency")
+        if concern_kpi:
+            concern_areas.append(
+                "Not using data to drive KPIs")
+        if concern_quality:
+            concern_areas.append(
+                "Product Quality Problems")
+        if concern_marketing:
+            concern_areas.append(
+                "Customer / Marketing")
+        if concern_ops:
+            concern_areas.append(
+                "Supply chain / Operations")
+        if concern_finance:
+            concern_areas.append("Finance")
 
-            dept_secondary = st.selectbox(
-                "Q3: SECONDARY department:",
-                ["None"] + dept_opts)
+        proceed_to_doc = False
 
-            data_age = st.radio(
-                "Q4: Data recency?",
-                ["📅 Last 3 months",
-                 "📆 Last 1 year",
-                 "🗓️ Last 3 years",
-                 "📂 More than 3 years",
-                 "❓ Not sure"])
-
-            dx_history = st.radio(
-                "Q5: Previous DX attempts?",
-                ["🆕 No — first attempt",
-                 "❌ Previous attempts failed",
-                 "⚡ Partial success",
-                 "🔄 In progress"])
-
-        st.markdown("---")
-
-        # ── DXPO DOC SUMMARY BOX ──
-        st.subheader("📋 DXPO DOC Summary")
-        col1, col2 = st.columns(2)
-        with col1:
-            st.info(f"""
-**🏭 Industry:** {industry}
-
-**🎯 Primary Concern:** {concern_primary}
-
-**🎯 Secondary Concern:** {concern_secondary}
-
-**📊 Primary Dept:** {dept_primary}
-
-**📊 Secondary Dept:** {dept_secondary}
-            """)
-        with col2:
-            st.info(f"""
-**📅 Data Age:** {data_age}
-
-**🔄 DX History:** {dx_history}
-            """)
-
-        st.markdown("---")
-
-        # ── STEP 2B: OPTIONAL QUESTIONS ──
-        st.subheader(
-            "🔬 Step 2B — Optional Questions")
-        st.caption(
-            "Like Ningendokku premium package!! "
-            "Answer for deeper analysis — "
-            "or skip to proceed!!")
-
-        show_optional = st.checkbox(
-            "✅ Yes — I want deeper analysis "
-            "(answer optional questions)",
-            value=False)
-
-        opt_context = {}
-
-        if show_optional:
+        if not concern_areas:
+            st.warning(
+                "☝️ Please select at least one "
+                "concern area to continue.")
+        elif concern_marketing:
+            st.success(
+                "✅ Marketing Dokku is ready for "
+                "your selected concern area(s)!!")
+            proceed_to_doc = True
+        else:
             st.info(
-                "These optional questions "
-                "trigger additional targeted "
-                "tests specific to your "
-                "business context!!")
+                "🚧 This module is coming soon — "
+                "Marketing Dokku is available now!!")
+
+        st.markdown("---")
+
+        if proceed_to_doc:
+            # ── STEP 2: DXPO DOC ──
+            st.subheader(
+                "🏥 Step 2 — DXPO DOC Interview")
+            st.caption(
+                "Like Ningendokku — "
+                "we listen first!!")
 
             col1, col2 = st.columns(2)
 
             with col1:
-                opt_country = st.selectbox(
-                    "OPT-Q0: Country/Region?",
-                    ["Not answered",
-                     "🇯🇵 Japan",
-                     "🌏 Southeast Asia",
-                     "🌏 South Asia",
-                     "🌏 East Asia",
-                     "🌍 Middle East",
-                     "🌐 Global"])
+                industry = st.radio(
+                    "Q1: Your industry?",
+                    ["🛒 Retail/E-commerce",
+                     "🏭 Manufacturing",
+                     "💰 Financial Services",
+                     "🏥 Healthcare",
+                     "🚚 Logistics/Supply Chain",
+                     "🔧 Other"])
 
-                opt_competitors = st.selectbox(
-                    "OPT-Q1: Main competitors?",
-                    ["Not answered",
-                     "Domestic only",
-                     "Global competitors",
-                     "Both domestic + global"])
+                concern_opts = [
+                    "📉 Revenue declining",
+                    "💸 Costs too high",
+                    "👥 Losing customers/churn",
+                    "⏱️ Processes too slow",
+                    "🔍 Cannot identify best customers",
+                    "📢 Marketing not effective"]
 
-                opt_size = st.selectbox(
-                    "OPT-Q2: Company size?",
-                    ["Not answered",
-                     "SME (under 100 staff)",
-                     "Mid-size (100-1000)",
-                     "Large (over 1000)"])
+                concern_primary = st.selectbox(
+                    "Q2: PRIMARY concern:",
+                    concern_opts)
 
-                opt_digital = st.selectbox(
-                    "OPT-Q3: Current digital tools?",
-                    ["Not answered",
-                     "None — paper based",
-                     "Basic (Excel only)",
-                     "Some (CRM/ERP)",
-                     "Advanced (AI/Analytics)"])
+                concern_secondary = st.selectbox(
+                    "Q2: SECONDARY concern:",
+                    ["None"] + concern_opts)
 
             with col2:
-                opt_budget = st.selectbox(
-                    "OPT-Q4: DX budget available?",
-                    ["Not answered",
-                     "Limited (under $10K)",
-                     "Moderate ($10K-$100K)",
-                     "Significant (over $100K)"])
+                dept_opts = [
+                    "📊 Sales & Marketing",
+                    "⚙️ Operations",
+                    "💹 Finance",
+                    "🤝 Customer Service",
+                    "🏢 All equally"]
 
-                opt_timeline = st.selectbox(
-                    "OPT-Q5: Implementation timeline?",
-                    ["Not answered",
-                     "Urgent (within 3 months)",
-                     "Normal (3-6 months)",
-                     "Long term (over 6 months)"])
+                dept_primary = st.selectbox(
+                    "Q3: PRIMARY department:",
+                    dept_opts)
 
-                opt_data_freq = st.selectbox(
-                    "OPT-Q6: How often is data updated?",
-                    ["Not answered",
-                     "Real-time / Daily",
-                     "Weekly / Monthly",
-                     "Quarterly / Annual",
-                     "Irregular"])
+                dept_secondary = st.selectbox(
+                    "Q3: SECONDARY department:",
+                    ["None"] + dept_opts)
 
-            opt_context = {
-                "country"     : opt_country,
-                "competitors" : opt_competitors,
-                "company_size": opt_size,
-                "digital_tools": opt_digital,
-                "dx_budget"   : opt_budget,
-                "timeline"    : opt_timeline,
-                "data_freq"   : opt_data_freq
-            }
+                data_age = st.radio(
+                    "Q4: Data recency?",
+                    ["📅 Last 3 months",
+                     "📆 Last 1 year",
+                     "🗓️ Last 3 years",
+                     "📂 More than 3 years",
+                     "❓ Not sure"])
 
-            # Show optional summary
-            answered = {k:v for k,v in
-                opt_context.items()
-                if v != "Not answered"}
+                dx_history = st.radio(
+                    "Q5: Previous DX attempts?",
+                    ["🆕 No — first attempt",
+                     "❌ Previous attempts failed",
+                     "⚡ Partial success",
+                     "🔄 In progress"])
 
-            if answered:
-                st.success(
-                    f"✅ {len(answered)} optional "
-                    f"questions answered!! "
-                    f"Deeper analysis enabled!!")
+            st.markdown("---")
+
+            # ── DXPO DOC SUMMARY BOX ──
+            st.subheader("📋 DXPO DOC Summary")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.info(f"""
+    **🏭 Industry:** {industry}
+
+    **🎯 Primary Concern:** {concern_primary}
+
+    **🎯 Secondary Concern:** {concern_secondary}
+
+    **📊 Primary Dept:** {dept_primary}
+
+    **📊 Secondary Dept:** {dept_secondary}
+                """)
+            with col2:
+                st.info(f"""
+    **📅 Data Age:** {data_age}
+
+    **🔄 DX History:** {dx_history}
+                """)
+
+            st.markdown("---")
+
+            # ── STEP 2B: OPTIONAL QUESTIONS ──
+            st.subheader(
+                "🔬 Step 2B — Optional Questions")
+            st.caption(
+                "Like Ningendokku premium package!! "
+                "Answer for deeper analysis — "
+                "or skip to proceed!!")
+
+            show_optional = st.checkbox(
+                "✅ Yes — I want deeper analysis "
+                "(answer optional questions)",
+                value=False)
+
+            opt_context = {}
+
+            if show_optional:
+                st.info(
+                    "These optional questions "
+                    "trigger additional targeted "
+                    "tests specific to your "
+                    "business context!!")
+
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    opt_country = st.selectbox(
+                        "OPT-Q0: Country/Region?",
+                        ["Not answered",
+                         "🇯🇵 Japan",
+                         "🌏 Southeast Asia",
+                         "🌏 South Asia",
+                         "🌏 East Asia",
+                         "🌍 Middle East",
+                         "🌐 Global"])
+
+                    opt_competitors = st.selectbox(
+                        "OPT-Q1: Main competitors?",
+                        ["Not answered",
+                         "Domestic only",
+                         "Global competitors",
+                         "Both domestic + global"])
+
+                    opt_size = st.selectbox(
+                        "OPT-Q2: Company size?",
+                        ["Not answered",
+                         "SME (under 100 staff)",
+                         "Mid-size (100-1000)",
+                         "Large (over 1000)"])
+
+                    opt_digital = st.selectbox(
+                        "OPT-Q3: Current digital tools?",
+                        ["Not answered",
+                         "None — paper based",
+                         "Basic (Excel only)",
+                         "Some (CRM/ERP)",
+                         "Advanced (AI/Analytics)"])
+
+                with col2:
+                    opt_budget = st.selectbox(
+                        "OPT-Q4: DX budget available?",
+                        ["Not answered",
+                         "Limited (under $10K)",
+                         "Moderate ($10K-$100K)",
+                         "Significant (over $100K)"])
+
+                    opt_timeline = st.selectbox(
+                        "OPT-Q5: Implementation timeline?",
+                        ["Not answered",
+                         "Urgent (within 3 months)",
+                         "Normal (3-6 months)",
+                         "Long term (over 6 months)"])
+
+                    opt_data_freq = st.selectbox(
+                        "OPT-Q6: How often is data updated?",
+                        ["Not answered",
+                         "Real-time / Daily",
+                         "Weekly / Monthly",
+                         "Quarterly / Annual",
+                         "Irregular"])
+
+                opt_context = {
+                    "country"     : opt_country,
+                    "competitors" : opt_competitors,
+                    "company_size": opt_size,
+                    "digital_tools": opt_digital,
+                    "dx_budget"   : opt_budget,
+                    "timeline"    : opt_timeline,
+                    "data_freq"   : opt_data_freq
+                }
+
+                # Show optional summary
+                answered = {k:v for k,v in
+                    opt_context.items()
+                    if v != "Not answered"}
+
+                if answered:
+                    st.success(
+                        f"✅ {len(answered)} optional "
+                        f"questions answered!! "
+                        f"Deeper analysis enabled!!")
+                else:
+                    st.warning(
+                        "⚠️  No optional questions "
+                        "answered yet!!")
             else:
-                st.warning(
-                    "⚠️  No optional questions "
-                    "answered yet!!")
-        else:
-            st.info(
-                "💡 Skipping optional questions — "
-                "standard analysis will run!!")
+                st.info(
+                    "💡 Skipping optional questions — "
+                    "standard analysis will run!!")
 
-        st.markdown("---")
+            st.markdown("---")
 
-        # ── STEP 3: RUN ANALYSIS ──
-        if st.button(
-            "🔬 Run Marketing Dokku + "
-            "Generate DXPO Report!!",
-            type="primary",
-            use_container_width=True):
-            st.session_state.run_analysis = True
+            # ── STEP 3: RUN ANALYSIS ──
+            if st.button(
+                "🔬 Run Marketing Dokku + "
+                "Generate DXPO Report!!",
+                type="primary",
+                use_container_width=True):
+                st.session_state.run_analysis = True
 
-        if st.session_state.get(
-            'run_analysis', False):
+            if st.session_state.get(
+                'run_analysis', False):
 
-            with st.spinner(
-                "🪄 Analyzing your data..."):
+                with st.spinner(
+                    "🪄 Analyzing your data..."):
 
-                # Detect columns
-                amt_cols = [
-                    c for c in df.columns
-                    if '-Amt' in c or
-                    'Amt' in c or
-                    'amount' in c.lower()]
-
-                if not amt_cols:
+                    # Detect columns
                     amt_cols = [
-                        c for c in
-                        df.select_dtypes(
-                        include=[np.number]
-                        ).columns
-                        if 'id' not in
-                        c.lower()]
+                        c for c in df.columns
+                        if '-Amt' in c or
+                        'Amt' in c or
+                        'amount' in c.lower()]
 
-                df['Total-Amt'] = (
-                    df[amt_cols].sum(axis=1))
-                n = len(df)
-                pain_points = []
+                    if not amt_cols:
+                        amt_cols = [
+                            c for c in
+                            df.select_dtypes(
+                            include=[np.number]
+                            ).columns
+                            if 'id' not in
+                            c.lower()]
 
-                # Status column
-                status_col = None
-                for c in df.columns:
-                    if 'status' in c.lower():
-                        status_col = c
-                        break
+                    df['Total-Amt'] = (
+                        df[amt_cols].sum(axis=1))
+                    n = len(df)
+                    pain_points = []
 
-                # Internet column
-                internet_col = None
-                internet_pct = 0
-                for c in df.columns:
-                    if 'internet' in c.lower():
-                        internet_col = c
-                        break
+                    # Status column
+                    status_col = None
+                    for c in df.columns:
+                        if 'status' in c.lower():
+                            status_col = c
+                            break
 
-                inactive = 0
-                inactive_spend = 0
-                active_spend = 0
+                    # Internet column
+                    internet_col = None
+                    internet_pct = 0
+                    for c in df.columns:
+                        if 'internet' in c.lower():
+                            internet_col = c
+                            break
 
-                # TEST 1: Retention
-                if status_col:
-                    inactive = (
-                        df[status_col]
-                        =='Inactive').sum()
-                    inactive_pct = inactive/n*100
-                    active_spend = df[
-                        df[status_col]=='Active'][
-                        'Total-Amt'].mean()
-                    inactive_spend = df[
-                        df[status_col]=='Inactive'][
-                        'Total-Amt'].mean()
-                    spend_gap = (
-                        active_spend -
-                        inactive_spend)
+                    inactive = 0
+                    inactive_spend = 0
+                    active_spend = 0
 
-                    if inactive_pct > 15:
-                        flag = ("🔴 RED"
-                            if inactive_pct > 30
-                            else "🟡 YELLOW")
-                        pain_points.append({
-                            "test":
-                                "Customer Retention",
-                            "finding":
-                                f"{inactive_pct:.1f}%"
-                                f" inactive · "
-                                f"${spend_gap:,.0f}"
-                                f" gap",
-                            "flag": flag})
-
-                # TEST 2: Digital Gap
-                if internet_col:
-                    internet_pct = (
-                        df[internet_col]>0
-                        ).sum()/n*100
-                    if internet_pct < 25:
-                        flag = ("🔴 RED"
-                            if internet_pct < 10
-                            else "🟡 YELLOW")
-                        pain_points.append({
-                            "test":
-                                "Digital Channel Gap",
-                            "finding":
-                                f"Only "
-                                f"{internet_pct:.1f}%"
-                                f" ordering online",
-                            "flag": flag})
-
-                # TEST 3: Revenue
-                rev_by_prod = {
-                    c.replace('-Amt',''):
-                    df[c].sum()
-                    for c in amt_cols}
-                total_rev = sum(
-                    rev_by_prod.values())
-                sorted_prods = sorted(
-                    rev_by_prod.items(),
-                    key=lambda x: x[1],
-                    reverse=True)
-                top_pct = (
-                    sorted_prods[0][1]/
-                    total_rev*100
-                    if sorted_prods else 0)
-                finding = ("Top 3: " +
-                    ", ".join([
-                        f"{p}({r/total_rev*100:.1f}%)"
-                        for p,r in
-                        sorted_prods[:3]])
-                    if sorted_prods else
-                    "No revenue data found")
-                if top_pct > 25:
-                    flag = ("🔴 RED"
-                        if top_pct > 40
-                        else "🟡 YELLOW")
-                    pain_points.append({
-                        "test":
-                            "Revenue Concentration",
-                        "finding": finding,
-                        "flag": flag})
-
-                # ADAPTIVE: Churn
-                churn_triggers = [
-                    "👥 Losing customers/churn",
-                    "🔍 Cannot identify best customers"]
-                if (concern_primary
-                    in churn_triggers or
-                    concern_secondary
-                    in churn_triggers):
+                    # TEST 1: Retention
                     if status_col:
-                        rev_at_risk = (
-                            inactive *
+                        inactive = (
+                            df[status_col]
+                            =='Inactive').sum()
+                        inactive_pct = inactive/n*100
+                        active_spend = df[
+                            df[status_col]=='Active'][
+                            'Total-Amt'].mean()
+                        inactive_spend = df[
+                            df[status_col]=='Inactive'][
+                            'Total-Amt'].mean()
+                        spend_gap = (
+                            active_spend -
                             inactive_spend)
+
+                        if inactive_pct > 15:
+                            flag = ("🔴 RED"
+                                if inactive_pct > 30
+                                else "🟡 YELLOW")
+                            pain_points.append({
+                                "test":
+                                    "Customer Retention",
+                                "finding":
+                                    f"{inactive_pct:.1f}%"
+                                    f" inactive · "
+                                    f"${spend_gap:,.0f}"
+                                    f" gap",
+                                "flag": flag})
+
+                    # TEST 2: Digital Gap
+                    if internet_col:
+                        internet_pct = (
+                            df[internet_col]>0
+                            ).sum()/n*100
+                        if internet_pct < 25:
+                            flag = ("🔴 RED"
+                                if internet_pct < 10
+                                else "🟡 YELLOW")
+                            pain_points.append({
+                                "test":
+                                    "Digital Channel Gap",
+                                "finding":
+                                    f"Only "
+                                    f"{internet_pct:.1f}%"
+                                    f" ordering online",
+                                "flag": flag})
+
+                    # TEST 3: Revenue
+                    rev_by_prod = {
+                        c.replace('-Amt',''):
+                        df[c].sum()
+                        for c in amt_cols}
+                    total_rev = sum(
+                        rev_by_prod.values())
+                    sorted_prods = sorted(
+                        rev_by_prod.items(),
+                        key=lambda x: x[1],
+                        reverse=True)
+                    top_pct = (
+                        sorted_prods[0][1]/
+                        total_rev*100
+                        if sorted_prods else 0)
+                    finding = ("Top 3: " +
+                        ", ".join([
+                            f"{p}({r/total_rev*100:.1f}%)"
+                            for p,r in
+                            sorted_prods[:3]])
+                        if sorted_prods else
+                        "No revenue data found")
+                    if top_pct > 25:
+                        flag = ("🔴 RED"
+                            if top_pct > 40
+                            else "🟡 YELLOW")
                         pain_points.append({
-                            "test": "Churn Risk",
-                            "finding":
-                                f"${rev_at_risk:,.0f}"
-                                f" revenue at risk",
-                            "flag": "🔴 RED"})
+                            "test":
+                                "Revenue Concentration",
+                            "finding": finding,
+                            "flag": flag})
 
-                # ── SHOW RESULTS ──
-                st.markdown("---")
-                st.subheader(
-                    "🔬 Step 3 — "
-                    "Marketing Dokku Results")
+                    # ADAPTIVE: Churn
+                    churn_triggers = [
+                        "👥 Losing customers/churn",
+                        "🔍 Cannot identify best customers"]
+                    if (concern_primary
+                        in churn_triggers or
+                        concern_secondary
+                        in churn_triggers):
+                        if status_col:
+                            rev_at_risk = (
+                                inactive *
+                                inactive_spend)
+                            pain_points.append({
+                                "test": "Churn Risk",
+                                "finding":
+                                    f"${rev_at_risk:,.0f}"
+                                    f" revenue at risk",
+                                "flag": "🔴 RED"})
 
-                red_pts = [p for p in
-                    pain_points
-                    if 'RED' in p['flag']]
-                yel_pts = [p for p in
-                    pain_points
-                    if 'YELLOW' in p['flag']]
+                    # ── SHOW RESULTS ──
+                    st.markdown("---")
+                    st.subheader(
+                        "🔬 Step 3 — "
+                        "Marketing Dokku Results")
 
-                col1,col2,col3 = st.columns(3)
-                with col1:
-                    st.metric(
-                        "Total Pain Points",
-                        len(pain_points))
-                with col2:
-                    st.metric(
-                        "🔴 RED Critical",
-                        len(red_pts))
-                with col3:
-                    st.metric(
-                        "🟡 YELLOW Monitor",
-                        len(yel_pts))
+                    red_pts = [p for p in
+                        pain_points
+                        if 'RED' in p['flag']]
+                    yel_pts = [p for p in
+                        pain_points
+                        if 'YELLOW' in p['flag']]
 
-                # ── OPTIONAL TRIGGERED TESTS ──
-                if opt_context:
-                    opt_pain = []
-
-                    # Digital Maturity Test
-                    if opt_context.get(
-                        "digital_tools") in [
-                        "None — paper based",
-                        "Basic (Excel only)"]:
-                        opt_pain.append({
-                            "test": "Digital Maturity Gap",
-                            "finding": f"Current tools: {opt_context.get('digital_tools')} — significant DX opportunity!!",
-                            "flag": "🔴 RED",
-                            "type": "Optional"})
-
-                    # Budget vs Urgency Test
-                    if (opt_context.get("timeline")
-                        == "Urgent (within 3 months)"
-                        and opt_context.get("dx_budget")
-                        == "Limited (under $10K)"):
-                        opt_pain.append({
-                            "test": "Budget-Urgency Mismatch",
-                            "finding": "Urgent timeline but limited budget — risk of failed implementation!!",
-                            "flag": "🔴 RED",
-                            "type": "Optional"})
-
-                    # Data Freshness Test
-                    if opt_context.get(
-                        "data_freq") in [
-                        "Quarterly / Annual",
-                        "Irregular"]:
-                        opt_pain.append({
-                            "test": "Data Freshness Risk",
-                            "finding": f"Data updated {opt_context.get('data_freq')} — insights may be outdated!!",
-                            "flag": "🟡 YELLOW",
-                            "type": "Optional"})
-
-                    # Competitive Risk Test
-                    if opt_context.get(
-                        "competitors") in [
-                        "Global competitors",
-                        "Both domestic + global"]:
-                        opt_pain.append({
-                            "test": "Global Competition Risk",
-                            "finding": f"Facing global competitors with only {internet_pct:.1f}% digital orders — critical gap!!",
-                            "flag": "🔴 RED",
-                            "type": "Optional"})
-
-                    if opt_pain:
-                        st.markdown("---")
-                        st.markdown(
-                            "### 🔬 Optional Tests — "
-                            "Triggered by Your Answers")
-                        st.caption(
-                            "These tests ran because "
-                            "of your Step 2B answers!!")
-
-                        for p in opt_pain:
-                            if "RED" in p["flag"]:
-                                icon = "🔴"
-                            else:
-                                icon = "🟡"
-                            st.markdown(
-                                f"**{icon} {p['test']}**")
-                            st.write(
-                                f"📋 {p['finding']}")
-                            st.write(
-                                f"Status: {p['flag']}")
-                            st.markdown("---")
-
-                        # Add to pain points
-                        pain_points.extend(opt_pain)
-
-                        st.success(
-                            f"✅ {len(opt_pain)} additional "
-                            f"pain points found from "
-                            f"optional questions!!")
-
-                # ── TEST DETAILS ──
-                st.markdown(
-                    "### 🔬 Marketing Dokku — Test Details")
-                st.caption(
-                    "Standard + Adaptive tests · "
-                    "Based on YOUR interview!!")
-
-                test_details = [
-                    {"label": "TEST 1",
-                     "name": "Customer Retention",
-                     "finding": f"{inactive_pct:.1f}% inactive · ${spend_gap:,.0f} gap"
-                                if status_col else "No status column",
-                     "flag": next((p["flag"] for p in pain_points
-                                  if p["test"]=="Customer Retention"),
-                                 "🟢 GREEN")},
-                    {"label": "TEST 2",
-                     "name": "Digital Channel Gap",
-                     "finding": f"Internet orders: {internet_pct:.1f}%"
-                                if internet_col else "No channel data",
-                     "flag": next((p["flag"] for p in pain_points
-                                  if p["test"]=="Digital Channel Gap"),
-                                 "🟢 GREEN")},
-                    {"label": "TEST 3",
-                     "name": "Revenue Concentration",
-                     "finding": finding,
-                     "flag": next((p["flag"] for p in pain_points
-                                  if p["test"]=="Revenue Concentration"),
-                                 "🟢 GREEN")},
-                    {"label": "TEST 4",
-                     "name": "Cross-sell Penetration",
-                     "finding": f"Single buyers: {((df[amt_cols]>0).sum(axis=1)==1).sum()/n*100:.1f}%",
-                     "flag": "🟢 GREEN"},
-                ]
-
-                # Add adaptive tests
-                for p in pain_points:
-                    if p["test"] not in [
-                        t["name"] for t in test_details]:
-                        test_details.append({
-                            "label": "A-TEST",
-                            "name": p["test"],
-                            "finding": p["finding"],
-                            "flag": p["flag"]
-                        })
-
-                # Display each test
-                # with enhanced descriptions
-                for t in test_details:
-                    if "RED" in t["flag"]:
-                        icon = "🔴"
-                        urgency = "CRITICAL — Action needed!!"
-                    elif "YELLOW" in t["flag"]:
-                        icon = "🟡"
-                        urgency = "MONITOR — Watch carefully!!"
-                    else:
-                        icon = "🟢"
-                        urgency = "HEALTHY — No action needed!!"
-
-                    # Why tested
-                    why = {
-                        "TEST 1": "Standard test — "
-                            "Customer retention is a "
-                            "core metric for ALL "
-                            "retail businesses!!",
-                        "TEST 2": "Standard test — "
-                            "Digital channel adoption "
-                            "is critical for modern "
-                            "retail competitiveness!!",
-                        "TEST 3": "Standard test — "
-                            "Revenue concentration "
-                            "measures business risk "
-                            "from product dependency!!",
-                        "TEST 4": "Standard test — "
-                            "Cross-sell penetration "
-                            "measures how well products "
-                            "complement each other!!",
-                        "A-TEST": "Adaptive test — "
-                            "Triggered by YOUR interview "
-                            "answer about customer "
-                            "concerns!!"
-                    }
-
-                    with st.expander(
-                        f"{icon} {t['label']}: "
-                        f"{t['name']} — "
-                        f"{t['flag']}",
-                        expanded=True):
-
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            st.markdown(
-                                "**📋 Finding:**")
-                            st.write(t["finding"])
-                            st.markdown(
-                                "**🎯 Urgency:**")
-                            st.write(urgency)
-                        with col2:
-                            st.markdown(
-                                "**❓ Why Tested:**")
-                            st.write(
-                                why.get(
-                                    t["label"],
-                                    "Adaptive test "
-                                    "triggered by "
-                                    "your interview!!"))
-
-                        st.markdown(
-                            "**📊 Statistical Note:**")
-                        if t["label"] == "TEST 1":
-                            st.write(
-                                f"Threshold: >15% inactive "
-                                f"= YELLOW · >30% = RED · "
-                                f"Your rate: "
-                                f"{inactive_pct:.1f}%")
-                        elif t["label"] == "TEST 2":
-                            st.write(
-                                f"Threshold: <25% online "
-                                f"= YELLOW · <10% = RED · "
-                                f"Your rate: "
-                                f"{internet_pct:.1f}%")
-                        elif t["label"] == "TEST 3":
-                            st.write(
-                                f"Threshold: >25% in one "
-                                f"product = YELLOW · "
-                                f">40% = RED · "
-                                f"Your top product: "
-                                f"{top_pct:.1f}%")
-                        elif t["label"] == "TEST 4":
-                            st.write(
-                                f"Threshold: >60% single "
-                                f"buyers = RED · "
-                                f">40% = YELLOW · "
-                                f"Healthy = GREEN")
-                        elif t["label"] == "A-TEST":
-                            st.write(
-                                f"Adaptive threshold: "
-                                f"Inactive spend < 60% "
-                                f"of active = RED · "
-                                f"Your ratio: "
-                                f"{inactive_spend/active_spend*100:.1f}%")
-
-                # ── COMPLETE RESULTS TABLE ──
-                st.markdown("### 📊 Marketing Dokku — Complete Test Results")
-                st.caption("All tests run · Standard + Adaptive · Based on YOUR interview!!")
-
-                # Build complete test results
-                all_tests = [
-                    {
-                        "test": "Customer Retention",
-                        "type": "Standard",
-                        "finding": f"{inactive_pct:.1f}% inactive · ${spend_gap:,.0f} gap"
-                                   if status_col else "No status column detected",
-                        "flag": next((p["flag"] for p in pain_points
-                                     if p["test"]=="Customer Retention"),
-                                    "🟢 GREEN")
-                    },
-                    {
-                        "test": "Digital Channel Gap",
-                        "type": "Standard",
-                        "finding": f"Only {internet_pct:.1f}% ordering online"
-                                   if internet_col else "No channel data detected",
-                        "flag": next((p["flag"] for p in pain_points
-                                     if p["test"]=="Digital Channel Gap"),
-                                    "🟢 GREEN")
-                    },
-                    {
-                        "test": "Revenue Concentration",
-                        "type": "Standard",
-                        "finding": finding,
-                        "flag": next((p["flag"] for p in pain_points
-                                     if p["test"]=="Revenue Concentration"),
-                                    "🟢 GREEN")
-                    },
-                    {
-                        "test": "Cross-sell Penetration",
-                        "type": "Standard",
-                        "finding": f"{(df['Total-Amt']>0).sum()/n*100:.1f}% active buyers",
-                        "flag": "🟢 GREEN"
-                    },
-                ]
-
-                # Add adaptive tests
-                for p in pain_points:
-                    if p["test"] not in [
-                        t["test"] for t in all_tests]:
-                        all_tests.append({
-                            "test": p["test"],
-                            "type": "Adaptive",
-                            "finding": p["finding"],
-                            "flag": p["flag"]
-                        })
-
-                # Build Plotly table
-                test_names = [t["test"]
-                    for t in all_tests]
-                test_types = [t["type"]
-                    for t in all_tests]
-                test_findings = [t["finding"]
-                    for t in all_tests]
-                test_flags = [t["flag"]
-                    for t in all_tests]
-
-                row_colors = []
-                for t in all_tests:
-                    if "RED" in t["flag"]:
-                        row_colors.append("#FDEDEC")
-                    elif "YELLOW" in t["flag"]:
-                        row_colors.append("#FEF9E7")
-                    else:
-                        row_colors.append("#EAFAF1")
-
-                fig_tests = go.Figure(data=[
-                    go.Table(
-                        columnwidth=[
-                            180, 80, 300, 100],
-                        header=dict(
-                            values=[
-                                "<b>Test</b>",
-                                "<b>Type</b>",
-                                "<b>Finding</b>",
-                                "<b>Status</b>"],
-                            fill_color="#1B3A6B",
-                            font=dict(
-                                color="white",
-                                size=12),
-                            align="center",
-                            height=40),
-                        cells=dict(
-                            values=[
-                                test_names,
-                                test_types,
-                                test_findings,
-                                test_flags],
-                            fill_color=[
-                                row_colors,
-                                row_colors,
-                                row_colors,
-                                row_colors],
-                            font=dict(
-                                color="#1B3A6B",
-                                size=11),
-                            align=["left",
-                                   "center",
-                                   "left",
-                                   "center"],
-                            height=35))])
-
-                fig_tests.update_layout(
-                    title=dict(
-                        text="🔬 Marketing Dokku — All Test Results",
-                        x=0.5,
-                        font=dict(
-                            size=14,
-                            color="#1B3A6B")),
-                    height=300,
-                    margin=dict(
-                        l=10,r=10,t=60,b=10))
-
-                st.plotly_chart(fig_tests,
-                    use_container_width=True)
-
-                # Download button
-                fig_tests.write_html(
-                    "dokku_results.html")
-                with open(
-                    "dokku_results.html",
-                    "rb") as f_html:
-                    st.download_button(
-                        "📥 Download Dokku Results",
-                        f_html,
-                        "DXPO_DukkuResults.html",
-                        use_container_width=True)
-
-                # Pain points summary
-                st.markdown("---")
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.metric(
-                        "🔴 RED Critical",
-                        len(red_pts))
-                with col2:
-                    st.metric(
-                        "🟡 YELLOW Monitor",
-                        len(yel_pts))
-                with col3:
-                    st.metric(
-                        "🟢 GREEN Healthy",
-                        len(all_tests) -
-                        len(red_pts) -
-                        len(yel_pts))
-
-                # Pain Point Chart
-                pain_names = [
-                    p['test']
-                    for p in pain_points]
-                pain_sevs = [
-                    3 if 'RED' in p['flag']
-                    else 2
-                    for p in pain_points]
-                colors = [
-                    '#E74C3C'
-                    if 'RED' in p['flag']
-                    else '#F39C12'
-                    for p in pain_points]
-
-                fig1 = go.Figure()
-                fig1.add_trace(go.Bar(
-                    x=pain_sevs,
-                    y=pain_names,
-                    orientation='h',
-                    marker_color=colors,
-                    text=[f"{s}/3"
-                        for s in pain_sevs],
-                    textposition='outside'))
-                fig1.update_layout(
-                    title=dict(
-                        text='🏥 Pain Point Summary',
-                        x=0.5,
-                        font=dict(
-                            size=16,
-                            color='#1B3A6B')),
-                    xaxis=dict(
-                        range=[0,4],
-                        tickvals=[0,1,2,3],
-                        ticktext=[
-                            '0','Low',
-                            'Medium','High']),
-                    yaxis=dict(
-                        autorange='reversed'),
-                    plot_bgcolor='#FAFAFA',
-                    paper_bgcolor='white',
-                    height=350,
-                    showlegend=False)
-
-                st.plotly_chart(fig1,
-                    use_container_width=True)
-
-                # Download Object 1
-                fig1.write_html(
-                    'obj1_painpoints.html')
-                with open(
-                    'obj1_painpoints.html',
-                    'rb') as f_html:
-                    st.download_button(
-                        "📥 Download Pain Point Chart",
-                        f_html,
-                        "DXPO_PainPoints.html",
-                        use_container_width=True)
-
-                st.markdown("---")
-
-                # ── IMPACT EVALUATION ──
-                st.subheader(
-                    "🎯 Step 4 — "
-                    "DXPO Impact Evaluation")
-                st.caption(
-                    "Figure 4 · "
-                    "Dr. Jay Rajasekera · "
-                    "APO Framework · Springer")
-
-                impact_scores = []
-                for i, p in enumerate(
-                        pain_points, 1):
-                    st.write(
-                        f"**{p['flag']} "
-                        f"{p['test']}**")
-                    col1, col2 = st.columns(2)
+                    col1,col2,col3 = st.columns(3)
                     with col1:
-                        a = st.slider(
-                            f"A — Customer Value",
-                            1, 10, 7,
-                            key=f"a_{i}")
+                        st.metric(
+                            "Total Pain Points",
+                            len(pain_points))
                     with col2:
-                        b = st.slider(
-                            f"B — Implementation",
-                            1, 10, 5,
-                            key=f"b_{i}")
-                    impact_scores.append({
-                        "pain_point": p['test'],
-                        "finding"  : p['finding'],
-                        "flag"     : p['flag'],
-                        "A": a, "B": b,
-                        "impact": a*b})
-                    st.write(
-                        f"Impact = "
-                        f"{a} × {b} = **{a*b}**")
+                        st.metric(
+                            "🔴 RED Critical",
+                            len(red_pts))
+                    with col3:
+                        st.metric(
+                            "🟡 YELLOW Monitor",
+                            len(yel_pts))
+
+                    # ── OPTIONAL TRIGGERED TESTS ──
+                    if opt_context:
+                        opt_pain = []
+
+                        # Digital Maturity Test
+                        if opt_context.get(
+                            "digital_tools") in [
+                            "None — paper based",
+                            "Basic (Excel only)"]:
+                            opt_pain.append({
+                                "test": "Digital Maturity Gap",
+                                "finding": f"Current tools: {opt_context.get('digital_tools')} — significant DX opportunity!!",
+                                "flag": "🔴 RED",
+                                "type": "Optional"})
+
+                        # Budget vs Urgency Test
+                        if (opt_context.get("timeline")
+                            == "Urgent (within 3 months)"
+                            and opt_context.get("dx_budget")
+                            == "Limited (under $10K)"):
+                            opt_pain.append({
+                                "test": "Budget-Urgency Mismatch",
+                                "finding": "Urgent timeline but limited budget — risk of failed implementation!!",
+                                "flag": "🔴 RED",
+                                "type": "Optional"})
+
+                        # Data Freshness Test
+                        if opt_context.get(
+                            "data_freq") in [
+                            "Quarterly / Annual",
+                            "Irregular"]:
+                            opt_pain.append({
+                                "test": "Data Freshness Risk",
+                                "finding": f"Data updated {opt_context.get('data_freq')} — insights may be outdated!!",
+                                "flag": "🟡 YELLOW",
+                                "type": "Optional"})
+
+                        # Competitive Risk Test
+                        if opt_context.get(
+                            "competitors") in [
+                            "Global competitors",
+                            "Both domestic + global"]:
+                            opt_pain.append({
+                                "test": "Global Competition Risk",
+                                "finding": f"Facing global competitors with only {internet_pct:.1f}% digital orders — critical gap!!",
+                                "flag": "🔴 RED",
+                                "type": "Optional"})
+
+                        if opt_pain:
+                            st.markdown("---")
+                            st.markdown(
+                                "### 🔬 Optional Tests — "
+                                "Triggered by Your Answers")
+                            st.caption(
+                                "These tests ran because "
+                                "of your Step 2B answers!!")
+
+                            for p in opt_pain:
+                                if "RED" in p["flag"]:
+                                    icon = "🔴"
+                                else:
+                                    icon = "🟡"
+                                st.markdown(
+                                    f"**{icon} {p['test']}**")
+                                st.write(
+                                    f"📋 {p['finding']}")
+                                st.write(
+                                    f"Status: {p['flag']}")
+                                st.markdown("---")
+
+                            # Add to pain points
+                            pain_points.extend(opt_pain)
+
+                            st.success(
+                                f"✅ {len(opt_pain)} additional "
+                                f"pain points found from "
+                                f"optional questions!!")
+
+                    # ── TEST DETAILS ──
+                    st.markdown(
+                        "### 🔬 Marketing Dokku — Test Details")
+                    st.caption(
+                        "Standard + Adaptive tests · "
+                        "Based on YOUR interview!!")
+
+                    test_details = [
+                        {"label": "TEST 1",
+                         "name": "Customer Retention",
+                         "finding": f"{inactive_pct:.1f}% inactive · ${spend_gap:,.0f} gap"
+                                    if status_col else "No status column",
+                         "flag": next((p["flag"] for p in pain_points
+                                      if p["test"]=="Customer Retention"),
+                                     "🟢 GREEN")},
+                        {"label": "TEST 2",
+                         "name": "Digital Channel Gap",
+                         "finding": f"Internet orders: {internet_pct:.1f}%"
+                                    if internet_col else "No channel data",
+                         "flag": next((p["flag"] for p in pain_points
+                                      if p["test"]=="Digital Channel Gap"),
+                                     "🟢 GREEN")},
+                        {"label": "TEST 3",
+                         "name": "Revenue Concentration",
+                         "finding": finding,
+                         "flag": next((p["flag"] for p in pain_points
+                                      if p["test"]=="Revenue Concentration"),
+                                     "🟢 GREEN")},
+                        {"label": "TEST 4",
+                         "name": "Cross-sell Penetration",
+                         "finding": f"Single buyers: {((df[amt_cols]>0).sum(axis=1)==1).sum()/n*100:.1f}%",
+                         "flag": "🟢 GREEN"},
+                    ]
+
+                    # Add adaptive tests
+                    for p in pain_points:
+                        if p["test"] not in [
+                            t["name"] for t in test_details]:
+                            test_details.append({
+                                "label": "A-TEST",
+                                "name": p["test"],
+                                "finding": p["finding"],
+                                "flag": p["flag"]
+                            })
+
+                    # Display each test
+                    # with enhanced descriptions
+                    for t in test_details:
+                        if "RED" in t["flag"]:
+                            icon = "🔴"
+                            urgency = "CRITICAL — Action needed!!"
+                        elif "YELLOW" in t["flag"]:
+                            icon = "🟡"
+                            urgency = "MONITOR — Watch carefully!!"
+                        else:
+                            icon = "🟢"
+                            urgency = "HEALTHY — No action needed!!"
+
+                        # Why tested
+                        why = {
+                            "TEST 1": "Standard test — "
+                                "Customer retention is a "
+                                "core metric for ALL "
+                                "retail businesses!!",
+                            "TEST 2": "Standard test — "
+                                "Digital channel adoption "
+                                "is critical for modern "
+                                "retail competitiveness!!",
+                            "TEST 3": "Standard test — "
+                                "Revenue concentration "
+                                "measures business risk "
+                                "from product dependency!!",
+                            "TEST 4": "Standard test — "
+                                "Cross-sell penetration "
+                                "measures how well products "
+                                "complement each other!!",
+                            "A-TEST": "Adaptive test — "
+                                "Triggered by YOUR interview "
+                                "answer about customer "
+                                "concerns!!"
+                        }
+
+                        with st.expander(
+                            f"{icon} {t['label']}: "
+                            f"{t['name']} — "
+                            f"{t['flag']}",
+                            expanded=True):
+
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.markdown(
+                                    "**📋 Finding:**")
+                                st.write(t["finding"])
+                                st.markdown(
+                                    "**🎯 Urgency:**")
+                                st.write(urgency)
+                            with col2:
+                                st.markdown(
+                                    "**❓ Why Tested:**")
+                                st.write(
+                                    why.get(
+                                        t["label"],
+                                        "Adaptive test "
+                                        "triggered by "
+                                        "your interview!!"))
+
+                            st.markdown(
+                                "**📊 Statistical Note:**")
+                            if t["label"] == "TEST 1":
+                                st.write(
+                                    f"Threshold: >15% inactive "
+                                    f"= YELLOW · >30% = RED · "
+                                    f"Your rate: "
+                                    f"{inactive_pct:.1f}%")
+                            elif t["label"] == "TEST 2":
+                                st.write(
+                                    f"Threshold: <25% online "
+                                    f"= YELLOW · <10% = RED · "
+                                    f"Your rate: "
+                                    f"{internet_pct:.1f}%")
+                            elif t["label"] == "TEST 3":
+                                st.write(
+                                    f"Threshold: >25% in one "
+                                    f"product = YELLOW · "
+                                    f">40% = RED · "
+                                    f"Your top product: "
+                                    f"{top_pct:.1f}%")
+                            elif t["label"] == "TEST 4":
+                                st.write(
+                                    f"Threshold: >60% single "
+                                    f"buyers = RED · "
+                                    f">40% = YELLOW · "
+                                    f"Healthy = GREEN")
+                            elif t["label"] == "A-TEST":
+                                st.write(
+                                    f"Adaptive threshold: "
+                                    f"Inactive spend < 60% "
+                                    f"of active = RED · "
+                                    f"Your ratio: "
+                                    f"{inactive_spend/active_spend*100:.1f}%")
+
+                    # ── COMPLETE RESULTS TABLE ──
+                    st.markdown("### 📊 Marketing Dokku — Complete Test Results")
+                    st.caption("All tests run · Standard + Adaptive · Based on YOUR interview!!")
+
+                    # Build complete test results
+                    all_tests = [
+                        {
+                            "test": "Customer Retention",
+                            "type": "Standard",
+                            "finding": f"{inactive_pct:.1f}% inactive · ${spend_gap:,.0f} gap"
+                                       if status_col else "No status column detected",
+                            "flag": next((p["flag"] for p in pain_points
+                                         if p["test"]=="Customer Retention"),
+                                        "🟢 GREEN")
+                        },
+                        {
+                            "test": "Digital Channel Gap",
+                            "type": "Standard",
+                            "finding": f"Only {internet_pct:.1f}% ordering online"
+                                       if internet_col else "No channel data detected",
+                            "flag": next((p["flag"] for p in pain_points
+                                         if p["test"]=="Digital Channel Gap"),
+                                        "🟢 GREEN")
+                        },
+                        {
+                            "test": "Revenue Concentration",
+                            "type": "Standard",
+                            "finding": finding,
+                            "flag": next((p["flag"] for p in pain_points
+                                         if p["test"]=="Revenue Concentration"),
+                                        "🟢 GREEN")
+                        },
+                        {
+                            "test": "Cross-sell Penetration",
+                            "type": "Standard",
+                            "finding": f"{(df['Total-Amt']>0).sum()/n*100:.1f}% active buyers",
+                            "flag": "🟢 GREEN"
+                        },
+                    ]
+
+                    # Add adaptive tests
+                    for p in pain_points:
+                        if p["test"] not in [
+                            t["test"] for t in all_tests]:
+                            all_tests.append({
+                                "test": p["test"],
+                                "type": "Adaptive",
+                                "finding": p["finding"],
+                                "flag": p["flag"]
+                            })
+
+                    # Build Plotly table
+                    test_names = [t["test"]
+                        for t in all_tests]
+                    test_types = [t["type"]
+                        for t in all_tests]
+                    test_findings = [t["finding"]
+                        for t in all_tests]
+                    test_flags = [t["flag"]
+                        for t in all_tests]
+
+                    row_colors = []
+                    for t in all_tests:
+                        if "RED" in t["flag"]:
+                            row_colors.append("#FDEDEC")
+                        elif "YELLOW" in t["flag"]:
+                            row_colors.append("#FEF9E7")
+                        else:
+                            row_colors.append("#EAFAF1")
+
+                    fig_tests = go.Figure(data=[
+                        go.Table(
+                            columnwidth=[
+                                180, 80, 300, 100],
+                            header=dict(
+                                values=[
+                                    "<b>Test</b>",
+                                    "<b>Type</b>",
+                                    "<b>Finding</b>",
+                                    "<b>Status</b>"],
+                                fill_color="#1B3A6B",
+                                font=dict(
+                                    color="white",
+                                    size=12),
+                                align="center",
+                                height=40),
+                            cells=dict(
+                                values=[
+                                    test_names,
+                                    test_types,
+                                    test_findings,
+                                    test_flags],
+                                fill_color=[
+                                    row_colors,
+                                    row_colors,
+                                    row_colors,
+                                    row_colors],
+                                font=dict(
+                                    color="#1B3A6B",
+                                    size=11),
+                                align=["left",
+                                       "center",
+                                       "left",
+                                       "center"],
+                                height=35))])
+
+                    fig_tests.update_layout(
+                        title=dict(
+                            text="🔬 Marketing Dokku — All Test Results",
+                            x=0.5,
+                            font=dict(
+                                size=14,
+                                color="#1B3A6B")),
+                        height=300,
+                        margin=dict(
+                            l=10,r=10,t=60,b=10))
+
+                    st.plotly_chart(fig_tests,
+                        use_container_width=True)
+
+                    # Download button
+                    fig_tests.write_html(
+                        "dokku_results.html")
+                    with open(
+                        "dokku_results.html",
+                        "rb") as f_html:
+                        st.download_button(
+                            "📥 Download Dokku Results",
+                            f_html,
+                            "DXPO_DukkuResults.html",
+                            use_container_width=True)
+
+                    # Pain points summary
+                    st.markdown("---")
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.metric(
+                            "🔴 RED Critical",
+                            len(red_pts))
+                    with col2:
+                        st.metric(
+                            "🟡 YELLOW Monitor",
+                            len(yel_pts))
+                    with col3:
+                        st.metric(
+                            "🟢 GREEN Healthy",
+                            len(all_tests) -
+                            len(red_pts) -
+                            len(yel_pts))
+
+                    # Pain Point Chart
+                    pain_names = [
+                        p['test']
+                        for p in pain_points]
+                    pain_sevs = [
+                        3 if 'RED' in p['flag']
+                        else 2
+                        for p in pain_points]
+                    colors = [
+                        '#E74C3C'
+                        if 'RED' in p['flag']
+                        else '#F39C12'
+                        for p in pain_points]
+
+                    fig1 = go.Figure()
+                    fig1.add_trace(go.Bar(
+                        x=pain_sevs,
+                        y=pain_names,
+                        orientation='h',
+                        marker_color=colors,
+                        text=[f"{s}/3"
+                            for s in pain_sevs],
+                        textposition='outside'))
+                    fig1.update_layout(
+                        title=dict(
+                            text='🏥 Pain Point Summary',
+                            x=0.5,
+                            font=dict(
+                                size=16,
+                                color='#1B3A6B')),
+                        xaxis=dict(
+                            range=[0,4],
+                            tickvals=[0,1,2,3],
+                            ticktext=[
+                                '0','Low',
+                                'Medium','High']),
+                        yaxis=dict(
+                            autorange='reversed'),
+                        plot_bgcolor='#FAFAFA',
+                        paper_bgcolor='white',
+                        height=350,
+                        showlegend=False)
+
+                    st.plotly_chart(fig1,
+                        use_container_width=True)
+
+                    # Download Object 1
+                    fig1.write_html(
+                        'obj1_painpoints.html')
+                    with open(
+                        'obj1_painpoints.html',
+                        'rb') as f_html:
+                        st.download_button(
+                            "📥 Download Pain Point Chart",
+                            f_html,
+                            "DXPO_PainPoints.html",
+                            use_container_width=True)
+
                     st.markdown("---")
 
-                impact_scores.sort(
-                    key=lambda x: x['impact'],
-                    reverse=True)
-                for i,p in enumerate(
-                        impact_scores,1):
-                    p['rank'] = i
+                    # ── IMPACT EVALUATION ──
+                    st.subheader(
+                        "🎯 Step 4 — "
+                        "DXPO Impact Evaluation")
+                    st.caption(
+                        "Figure 4 · "
+                        "Dr. Jay Rajasekera · "
+                        "APO Framework · Springer")
 
-                # Impact Table
-                processes = [p['pain_point']
-                    for p in impact_scores]
-                a_vals = [p['A']
-                    for p in impact_scores]
-                b_vals = [p['B']
-                    for p in impact_scores]
-                impacts = [p['impact']
-                    for p in impact_scores]
-                ranks = [f"#{p['rank']}"
-                    for p in impact_scores]
-                colors2 = [
-                    '#2ECC71' if i>=70 else
-                    '#F39C12' if i>=50 else
-                    '#E74C3C'
-                    for i in impacts]
+                    impact_scores = []
+                    for i, p in enumerate(
+                            pain_points, 1):
+                        st.write(
+                            f"**{p['flag']} "
+                            f"{p['test']}**")
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            a = st.slider(
+                                f"A — Customer Value",
+                                1, 10, 7,
+                                key=f"a_{i}")
+                        with col2:
+                            b = st.slider(
+                                f"B — Implementation",
+                                1, 10, 5,
+                                key=f"b_{i}")
+                        impact_scores.append({
+                            "pain_point": p['test'],
+                            "finding"  : p['finding'],
+                            "flag"     : p['flag'],
+                            "A": a, "B": b,
+                            "impact": a*b})
+                        st.write(
+                            f"Impact = "
+                            f"{a} × {b} = **{a*b}**")
+                        st.markdown("---")
 
-                fig2 = go.Figure(data=[
-                    go.Table(
-                        columnwidth=[
-                            260,70,70,90,70],
-                        header=dict(
-                            values=[
-                                '<b>Process</b>',
-                                '<b>A</b>',
-                                '<b>B</b>',
-                                '<b>Impact</b>',
-                                '<b>Rank</b>'],
-                            fill_color='#1B3A6B',
-                            font=dict(
-                                color='white',
-                                size=12),
-                            align='center',
-                            height=45),
-                        cells=dict(
-                            values=[
-                                processes,
-                                a_vals,
-                                b_vals,
-                                impacts,
-                                ranks],
-                            fill_color=[
-                                ['#F8F9FA']*
-                                len(processes),
-                                ['#EBF5FB']*
-                                len(processes),
-                                ['#EBF5FB']*
-                                len(processes),
-                                colors2,
-                                ['#F8F9FA']*
-                                len(processes)],
-                            font=dict(
-                                color=[
-                                    ['#1B3A6B']*
+                    impact_scores.sort(
+                        key=lambda x: x['impact'],
+                        reverse=True)
+                    for i,p in enumerate(
+                            impact_scores,1):
+                        p['rank'] = i
+
+                    # Impact Table
+                    processes = [p['pain_point']
+                        for p in impact_scores]
+                    a_vals = [p['A']
+                        for p in impact_scores]
+                    b_vals = [p['B']
+                        for p in impact_scores]
+                    impacts = [p['impact']
+                        for p in impact_scores]
+                    ranks = [f"#{p['rank']}"
+                        for p in impact_scores]
+                    colors2 = [
+                        '#2ECC71' if i>=70 else
+                        '#F39C12' if i>=50 else
+                        '#E74C3C'
+                        for i in impacts]
+
+                    fig2 = go.Figure(data=[
+                        go.Table(
+                            columnwidth=[
+                                260,70,70,90,70],
+                            header=dict(
+                                values=[
+                                    '<b>Process</b>',
+                                    '<b>A</b>',
+                                    '<b>B</b>',
+                                    '<b>Impact</b>',
+                                    '<b>Rank</b>'],
+                                fill_color='#1B3A6B',
+                                font=dict(
+                                    color='white',
+                                    size=12),
+                                align='center',
+                                height=45),
+                            cells=dict(
+                                values=[
+                                    processes,
+                                    a_vals,
+                                    b_vals,
+                                    impacts,
+                                    ranks],
+                                fill_color=[
+                                    ['#F8F9FA']*
                                     len(processes),
-                                    ['#1B3A6B']*
+                                    ['#EBF5FB']*
                                     len(processes),
-                                    ['#1B3A6B']*
+                                    ['#EBF5FB']*
                                     len(processes),
-                                    ['white']*
-                                    len(processes),
-                                    ['#1B3A6B']*
+                                    colors2,
+                                    ['#F8F9FA']*
                                     len(processes)],
-                                size=12),
-                            align='center',
-                            height=38))])
+                                font=dict(
+                                    color=[
+                                        ['#1B3A6B']*
+                                        len(processes),
+                                        ['#1B3A6B']*
+                                        len(processes),
+                                        ['#1B3A6B']*
+                                        len(processes),
+                                        ['white']*
+                                        len(processes),
+                                        ['#1B3A6B']*
+                                        len(processes)],
+                                    size=12),
+                                align='center',
+                                height=38))])
 
-                fig2.update_layout(
-                    title=dict(
-                        text='🎯 DXPO Impact Table · '
-                             'Dr. Jay Rajasekera',
-                        x=0.5,
-                        font=dict(
-                            size=14,
-                            color='#1B3A6B')),
-                    height=300,
-                    margin=dict(
-                        l=10,r=10,t=60,b=10))
+                    fig2.update_layout(
+                        title=dict(
+                            text='🎯 DXPO Impact Table · '
+                                 'Dr. Jay Rajasekera',
+                            x=0.5,
+                            font=dict(
+                                size=14,
+                                color='#1B3A6B')),
+                        height=300,
+                        margin=dict(
+                            l=10,r=10,t=60,b=10))
 
-                st.plotly_chart(fig2,
-                    use_container_width=True)
-
-                fig2.write_html(
-                    'obj2_impact.html')
-                with open(
-                    'obj2_impact.html',
-                    'rb') as f_html:
-                    st.download_button(
-                        "📥 Download Impact Table",
-                        f_html,
-                        "DXPO_ImpactTable.html",
+                    st.plotly_chart(fig2,
                         use_container_width=True)
 
-                st.markdown("---")
+                    fig2.write_html(
+                        'obj2_impact.html')
+                    with open(
+                        'obj2_impact.html',
+                        'rb') as f_html:
+                        st.download_button(
+                            "📥 Download Impact Table",
+                            f_html,
+                            "DXPO_ImpactTable.html",
+                            use_container_width=True)
 
-                # ── CLAUDE REPORT ──
-                st.subheader(
-                    "🪄 Step 5 — DXPO Report")
+                    st.markdown("---")
 
-                summary = (
-                    f"Industry: {industry}\n"
-                    f"Concern: {concern_primary}\n"
-                    f"Pain points found: "
-                    f"{len(pain_points)}\n")
-                for p in impact_scores:
-                    summary += (
-                        f"#{p['rank']} "
-                        f"{p['pain_point']}: "
-                        f"Impact={p['impact']}/100\n")
+                    # ── CLAUDE REPORT ──
+                    st.subheader(
+                        "🪄 Step 5 — DXPO Report")
 
-                try:
-                    api_key = os.environ.get(
-                        "ANTHROPIC_API_KEY","")
-                    client = anthropic.Anthropic(
-                        api_key=api_key)
-                    message = (
-                        client.messages.create(
-                        model="claude-opus-4-5",
-                        max_tokens=1500,
-                        messages=[{
-                            "role":"user",
-                            "content":
-                            f"""
-You are DXPO AI Magic Box by
-Dr. Jay Rajasekera,
-Tokyo International University.
+                    summary = (
+                        f"Industry: {industry}\n"
+                        f"Concern: {concern_primary}\n"
+                        f"Pain points found: "
+                        f"{len(pain_points)}\n")
+                    for p in impact_scores:
+                        summary += (
+                            f"#{p['rank']} "
+                            f"{p['pain_point']}: "
+                            f"Impact={p['impact']}/100\n")
 
-Generate professional DXPO report:
-{summary}
+                    try:
+                        api_key = os.environ.get(
+                            "ANTHROPIC_API_KEY","")
+                        client = anthropic.Anthropic(
+                            api_key=api_key)
+                        message = (
+                            client.messages.create(
+                            model="claude-opus-4-5",
+                            max_tokens=1500,
+                            messages=[{
+                                "role":"user",
+                                "content":
+                                f"""
+    You are DXPO AI Magic Box by
+    Dr. Jay Rajasekera,
+    Tokyo International University.
 
-Include:
-1. EXECUTIVE SUMMARY
-2. TOP PAIN POINTS
-3. RECOMMENDED DX APPROACH
-4. QUICK WINS (30 days)
-5. STRATEGIC ROADMAP
-"""
-                        }]))
-                    report = (
-                        message.content[0].text)
-                except Exception as e:
-                    report = f"Error: {e}"
+    Generate professional DXPO report:
+    {summary}
 
-                st.markdown(report)
+    Include:
+    1. EXECUTIVE SUMMARY
+    2. TOP PAIN POINTS
+    3. RECOMMENDED DX APPROACH
+    4. QUICK WINS (30 days)
+    5. STRATEGIC ROADMAP
+    """
+                            }]))
+                        report = (
+                            message.content[0].text)
+                    except Exception as e:
+                        report = f"Error: {e}"
 
-                st.download_button(
-                    "📥 Download DXPO Report",
-                    report,
-                    "DXPO_Report.txt",
-                    use_container_width=True)
+                    st.markdown(report)
 
-                st.success(
-                    "✅ Analysis complete!!")
-                st.balloons()
+                    st.download_button(
+                        "📥 Download DXPO Report",
+                        report,
+                        "DXPO_Report.txt",
+                        use_container_width=True)
+
+                    st.success(
+                        "✅ Analysis complete!!")
+                    st.balloons()
 
     except Exception as e:
         st.error(f"❌ Error: {e}")
