@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import anthropic
-import os 
+import os
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -12,7 +12,7 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jun 21, 2026-->dxpo_app (28) version
+# Header Jun 21, 2026-->dxpo_app (29) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
@@ -377,10 +377,25 @@ Reply with ONLY the """
     **📊 Secondary Dept:** {dept_secondary}
                 """)
             with col2:
+                symptom_text = (
+                    st.session_state.get(
+                        'open_symptom_text', ''))
+                symptom_cat = (
+                    st.session_state.get(
+                        'symptom_category', ''))
+                symptom_line = ""
+                if symptom_text:
+                    symptom_line = (
+                        "\n\n**🩺 Other Concern "
+                        "(your words):** \"" +
+                        symptom_text + "\"" +
+                        "\n\n**→ Classified as:** "
+                        + symptom_cat)
                 st.info(f"""
     **📅 Data Age:** {data_age}
 
     **🔄 DX History:** {dx_history}
+    {symptom_line}
                 """)
 
             st.markdown("---")
@@ -649,6 +664,119 @@ Reply with ONLY the """
                                     f" revenue at risk",
                                 "flag": "🔴 RED"})
 
+                    # SYMPTOM TEST: AI-interpreted
+                    # test for the open symptom the
+                    # user described in their own
+                    # words (Step 0). Unlike TEST
+                    # 1-4 and adaptive tests, this
+                    # has no fixed statistical
+                    # threshold — it's Claude
+                    # reading a compact summary of
+                    # the actual uploaded data
+                    # alongside the symptom text,
+                    # like a specialized clinic test
+                    # ordered for a specific patient
+                    # complaint.
+                    symptom_text_for_test = (
+                        st.session_state.get(
+                            'open_symptom_text', ''))
+                    if symptom_text_for_test:
+                        try:
+                            total_rev_val = (
+                                df['Total-Amt']
+                                .sum())
+                            avg_txn_val = (
+                                df['Total-Amt']
+                                .mean())
+                            data_summary = (
+                                "Rows: " + str(n)
+                                + "\nColumns: " +
+                                str(list(
+                                    df.columns))
+                                + "\nTotal "
+                                "revenue: $" +
+                                f"{total_rev_val:,.0f}"
+                                + "\nAvg "
+                                "transaction: $" +
+                                f"{avg_txn_val:,.0f}")
+                            if status_col:
+                                data_summary += (
+                                    "\nActive: " +
+                                    str(n-inactive)
+                                    + " · "
+                                    "Inactive: " +
+                                    str(inactive))
+
+                            api_key = (
+                                os.environ.get(
+                                    "ANTHROPIC_"
+                                    "API_KEY", ""))
+                            client = (
+                                anthropic.Anthropic(
+                                    api_key=
+                                    api_key))
+                            prompt_text = (
+                                "A company "
+                                "described this "
+                                "concern: \"" +
+                                symptom_text_for_test
+                                + "\"\n\nHere is a "
+                                "summary of their "
+                                "actual data:\n" +
+                                data_summary +
+                                "\n\nIn 1-2 short "
+                                "sentences, does "
+                                "this data give "
+                                "any evidence "
+                                "relevant to "
+                                "their concern? "
+                                "Be specific and "
+                                "factual — only "
+                                "use what's in "
+                                "the summary "
+                                "above. If the "
+                                "summary doesn't "
+                                "have enough "
+                                "detail to say "
+                                "anything useful, "
+                                "say so plainly.")
+                            msg = (
+                                client.messages
+                                .create(
+                                model=
+                                "claude-opus-4-5",
+                                max_tokens=200,
+                                messages=[{
+                                    "role":
+                                    "user",
+                                    "content":
+                                    prompt_text
+                                }]))
+                            symptom_finding = (
+                                msg.content[0]
+                                .text.strip())
+                            pain_points.append({
+                                "test":
+                                "Your Reported "
+                                "Concern (AI "
+                                "Review)",
+                                "finding":
+                                symptom_finding,
+                                "flag":
+                                "🟡 YELLOW"})
+                        except Exception as e:
+                            pain_points.append({
+                                "test":
+                                "Your Reported "
+                                "Concern (AI "
+                                "Review)",
+                                "finding":
+                                "Could not run "
+                                "AI review right "
+                                "now: " + str(e),
+                                "flag":
+                                "🟡 YELLOW"})
+
                     # ── SHOW RESULTS ──
                     st.markdown("---")
                     st.subheader(
@@ -792,8 +920,16 @@ Reply with ONLY the """
                     for p in pain_points:
                         if p["test"] not in [
                             t["name"] for t in test_details]:
+                            is_symptom_test = (
+                                p["test"] ==
+                                "Your Reported "
+                                "Concern (AI "
+                                "Review)")
                             test_details.append({
-                                "label": "A-TEST",
+                                "label":
+                                "S-TEST" if
+                                is_symptom_test
+                                else "A-TEST",
                                 "name": p["test"],
                                 "finding": p["finding"],
                                 "flag": p["flag"]
@@ -833,7 +969,15 @@ Reply with ONLY the """
                             "A-TEST": "Adaptive test — "
                                 "Triggered by YOUR interview "
                                 "answer about customer "
-                                "concerns!!"
+                                "concerns!!",
+                            "S-TEST": "Specialized test — "
+                                "Triggered by the concern "
+                                "YOU described in your own "
+                                "words (Step 0). Like a "
+                                "specific test a clinic runs "
+                                "because the patient flagged "
+                                "a symptom not on the "
+                                "standard form!!"
                         }
 
                         with st.expander(
@@ -894,6 +1038,17 @@ Reply with ONLY the """
                                     f"of active = RED · "
                                     f"Your ratio: "
                                     f"{inactive_spend/active_spend*100:.1f}%")
+                            elif t["label"] == "S-TEST":
+                                st.write(
+                                    "No fixed statistical "
+                                    "threshold — this is "
+                                    "Claude's interpretation "
+                                    "of your actual data in "
+                                    "light of the concern "
+                                    "you described. Treat "
+                                    "as a starting point for "
+                                    "discussion, not a "
+                                    "precise measurement.")
 
                     # ── COMPLETE RESULTS TABLE ──
                     st.markdown("### 📊 Marketing Dokku — Complete Test Results")
