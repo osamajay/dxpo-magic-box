@@ -12,7 +12,7 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jun 21, 2026-->dxpo_app (27) version
+# Header Jun 21, 2026-->dxpo_app (28) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
@@ -109,6 +109,115 @@ if uploaded_file is not None:
         if concern_finance:
             concern_areas.append("Finance")
 
+        # ── OPEN SYMPTOM (free text) ──
+        st.markdown(
+            "Anything else bothering you that "
+            "isn't listed above? *(optional — "
+            "like telling the nurse "
+            "'my left eye seems weak', even "
+            "though it's not on the form)*")
+        open_symptom = st.text_area(
+            "Describe it in your own words:",
+            key="open_symptom",
+            placeholder=(
+                "e.g., 'We can't tell which "
+                "products are actually "
+                "profitable' or 'Our reports "
+                "take 3 days to put together'"))
+
+        symptom_category = None
+        if open_symptom and open_symptom.strip():
+            if st.button(
+                "🔍 Check this symptom"):
+                with st.spinner(
+                    "🩺 Reviewing your symptom..."):
+                    try:
+                        api_key = os.environ.get(
+                            "ANTHROPIC_API_KEY", "")
+                        client = anthropic.Anthropic(
+                            api_key=api_key)
+                        cat_list = (
+                            "HR / Workforce "
+                            "efficiency, Not using "
+                            "data to drive KPIs, "
+                            "Product Quality "
+                            "Problems, Customer / "
+                            "Marketing, Supply "
+                            "chain / Operations, "
+                            "Finance, or NEW "
+                            "(if none fit)")
+                        msg = client.messages.create(
+                            model="claude-opus-4-5",
+                            max_tokens=200,
+                            messages=[{
+                                "role": "user",
+                                "content":
+                                f"""A company """
+                                f"""described this """
+                                f"""concern in their """
+                                f"""own words:
+"{open_symptom}"
+
+Classify it into """
+                                f"""EXACTLY ONE of """
+                                f"""these categories: """
+                                f"""{cat_list}
+
+Reply with ONLY the """
+                                f"""category name, """
+                                f"""nothing else."""
+                            }])
+                        symptom_category = (
+                            msg.content[0]
+                            .text.strip())
+                        st.session_state[
+                            'symptom_category'] = (
+                            symptom_category)
+                        st.session_state[
+                            'open_symptom_text'] = (
+                            open_symptom)
+                        st.info(
+                            f"🩺 This sounds like "
+                            f"it falls under: "
+                            f"**{symptom_category}**")
+                        if (symptom_category ==
+                            "Customer / Marketing"
+                            and not
+                            concern_marketing):
+                            st.success(
+                                "✅ Good news — "
+                                "Marketing Dokku "
+                                "covers this. "
+                                "We've added it "
+                                "to your selected "
+                                "areas!!")
+                            concern_areas.append(
+                                "Customer / "
+                                "Marketing "
+                                "(from symptom)")
+                            concern_marketing = (
+                                True)
+                    except Exception as e:
+                        st.warning(
+                            f"Could not classify "
+                            f"symptom right now: "
+                            f"{e}")
+
+        # Persist symptom classification across
+        # reruns (e.g. user checks another box
+        # after already classifying a symptom)
+        if (st.session_state.get(
+            'symptom_category') ==
+            "Customer / Marketing"
+            and not concern_marketing):
+            concern_marketing = True
+            if ("Customer / Marketing "
+                "(from symptom)" not in
+                concern_areas):
+                concern_areas.append(
+                    "Customer / Marketing "
+                    "(from symptom)")
+
         proceed_to_doc = False
 
         if not concern_areas:
@@ -116,6 +225,62 @@ if uploaded_file is not None:
                 "☝️ Please select at least one "
                 "concern area to continue.")
         elif concern_marketing:
+            # ── DATA GAP CHECK ──
+            # Lightweight check: does this file
+            # look like it has ANY
+            # customer/marketing-relevant
+            # columns? (amount, status, customer
+            # id, or channel-like). Mirrors (but
+            # does not duplicate) the stricter
+            # detection Step 3 runs later.
+            cols_lower = [
+                c.lower() for c in df.columns]
+            has_amount = any(
+                'amt' in c or 'amount' in c or
+                'price' in c or 'revenue' in c or
+                'spend' in c
+                for c in cols_lower)
+            has_status = any(
+                'status' in c for c in cols_lower)
+            has_customer_id = any(
+                'customer' in c or 'client' in c
+                for c in cols_lower)
+            has_channel = any(
+                'channel' in c or 'internet' in c
+                or 'online' in c
+                for c in cols_lower)
+
+            data_looks_relevant = (
+                has_amount or has_status or
+                has_customer_id or has_channel)
+
+            if not data_looks_relevant:
+                st.warning(
+                    "🔬 **Data Gap Detected** — "
+                    "your uploaded file doesn't "
+                    "look like it has "
+                    "customer/marketing data "
+                    "(no amount, status, "
+                    "customer ID, or channel "
+                    "columns found).")
+                st.markdown(
+                    "Like a specialized clinic "
+                    "test, this needs data we "
+                    "don't have yet. To run "
+                    "Marketing Dokku properly, "
+                    "please go get a dataset "
+                    "with columns such as:\n"
+                    "- Customer ID / name\n"
+                    "- Purchase amount / "
+                    "revenue per transaction\n"
+                    "- Customer status "
+                    "(Active/Inactive)\n"
+                    "- Order channel "
+                    "(online/in-store)\n\n"
+                    "You can still proceed with "
+                    "what you have, but results "
+                    "may be limited.")
+
             st.success(
                 "✅ Marketing Dokku is ready for "
                 "your selected concern area(s)!!")
