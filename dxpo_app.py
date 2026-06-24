@@ -12,14 +12,14 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jun 24, 2026-->dxpo_app (30) version
+# Header Jun 24, 2026-->dxpo_app (31) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(30)")
+    "Process Optimization ver(31)")
 st.markdown("---")
 
 # ── STEP 1: FILE UPLOAD ──
@@ -109,128 +109,177 @@ if uploaded_file is not None:
         if concern_finance:
             concern_areas.append("Finance")
 
-        # ── OPEN SYMPTOM (free text) ──
+        # ── OPEN SYMPTOMS (multi-concern) ──
         st.markdown(
             "Anything else bothering you that "
             "isn't listed above? *(optional — "
-            "like telling the nurse "
-            "'my left eye seems weak', even "
-            "though it's not on the form)*")
-        open_symptom = st.text_area(
-            "Describe it in your own words:",
-            key="open_symptom",
-            placeholder=(
-                "e.g., 'We can't tell which "
-                "products are actually "
-                "profitable' or 'Our reports "
-                "take 3 days to put together'"))
+            "like telling the nurse about "
+            "multiple symptoms, each in their "
+            "own words)*")
 
-        symptom_category = None
-        if open_symptom and open_symptom.strip():
-            # Auto-classify whenever the text
-            # changes — no separate button click
-            # needed. Cache against the exact text
-            # so we don't re-call the API on every
-            # unrelated rerun (e.g. checking other
-            # boxes).
-            already_classified_text = (
-                st.session_state.get(
-                    'open_symptom_text', ''))
-            if open_symptom != already_classified_text:
-                with st.spinner(
-                    "🩺 Reviewing your symptom..."):
-                    try:
-                        api_key = os.environ.get(
-                            "ANTHROPIC_API_KEY", "")
-                        client = anthropic.Anthropic(
-                            api_key=api_key)
-                        cat_list = (
-                            "HR / Workforce "
-                            "efficiency, Not using "
-                            "data to drive KPIs, "
-                            "Product Quality "
-                            "Problems, Customer / "
-                            "Marketing, Supply "
-                            "chain / Operations, "
-                            "Finance, or NEW "
-                            "(if none fit)")
-                        msg = client.messages.create(
-                            model="claude-opus-4-5",
-                            max_tokens=200,
-                            messages=[{
-                                "role": "user",
-                                "content":
-                                f"""A company """
-                                f"""described this """
-                                f"""concern in their """
-                                f"""own words:
-"{open_symptom}"
+        # Initialise concern count in
+        # session_state (persists across reruns)
+        if 'num_concerns' not in (
+            st.session_state):
+            st.session_state['num_concerns'] = 1
 
-Classify it into """
-                                f"""EXACTLY ONE of """
-                                f"""these categories: """
-                                f"""{cat_list}
+        MAX_CONCERNS = 5
+        cat_list = (
+            "HR / Workforce efficiency, "
+            "Not using data to drive KPIs, "
+            "Product Quality Problems, "
+            "Customer / Marketing, "
+            "Supply chain / Operations, "
+            "Finance, or NEW (if none fit)")
 
-Reply with ONLY the """
-                                f"""category name, """
-                                f"""nothing else."""
-                            }])
-                        symptom_category = (
-                            msg.content[0]
-                            .text.strip())
+        # Cached concerns dict: key = index,
+        # value = {text, category}
+        if 'concerns_cache' not in (
+            st.session_state):
+            st.session_state[
+                'concerns_cache'] = {}
+
+        def classify_concern(text):
+            """Call Claude to classify one
+            concern text. Returns category
+            string or None on error."""
+            try:
+                api_key = os.environ.get(
+                    "ANTHROPIC_API_KEY", "")
+                client = anthropic.Anthropic(
+                    api_key=api_key)
+                content = (
+                    "A company described "
+                    "this concern in their "
+                    "own words:\n\"" +
+                    text +
+                    "\"\n\nClassify it into "
+                    "EXACTLY ONE of these "
+                    "categories: " +
+                    cat_list +
+                    "\n\nReply with ONLY "
+                    "the category name, "
+                    "nothing else.")
+                msg = client.messages.create(
+                    model="claude-opus-4-5",
+                    max_tokens=100,
+                    messages=[{
+                        "role": "user",
+                        "content": content}])
+                return (msg.content[0]
+                        .text.strip())
+            except Exception as e:
+                st.warning(
+                    "Could not classify: "
+                    + str(e))
+                return None
+
+        # Render one text_area per concern
+        for i in range(
+            st.session_state['num_concerns']):
+            cached = (
+                st.session_state[
+                    'concerns_cache']
+                .get(i, {}))
+            label = (
+                "Concern " + str(i + 1) +
+                ":")
+            placeholder = (
+                "e.g., 'Worrying about "
+                "trend analysis for "
+                "sales items'"
+                if i > 0 else
+                "e.g., 'Do not have good "
+                "marketing intelligence'")
+            typed = st.text_area(
+                label,
+                key="concern_" + str(i),
+                placeholder=placeholder)
+
+            if typed and typed.strip():
+                # Auto-classify on blur if
+                # text changed since last run
+                if typed != cached.get(
+                        'text', ''):
+                    with st.spinner(
+                        "🩺 Reviewing "
+                        "concern " +
+                        str(i + 1) + "..."):
+                        cat = classify_concern(
+                            typed)
+                    if cat:
                         st.session_state[
-                            'symptom_category'] = (
-                            symptom_category)
-                        st.session_state[
-                            'open_symptom_text'] = (
-                            open_symptom)
-                    except Exception as e:
-                        st.warning(
-                            f"Could not classify "
-                            f"symptom right now: "
-                            f"{e}")
-            else:
-                symptom_category = (
-                    st.session_state.get(
-                        'symptom_category'))
+                            'concerns_cache'
+                        ][i] = {
+                            'text': typed,
+                            'category': cat}
+                        cached = (
+                            st.session_state[
+                                'concerns_cache'
+                            ][i])
+                else:
+                    pass  # use cached
 
-            if symptom_category:
-                st.info(
-                    f"🩺 This sounds like "
-                    f"it falls under: "
-                    f"**{symptom_category}**")
-                if (symptom_category ==
+                if cached.get('category'):
+                    st.info(
+                        "🩺 Concern " +
+                        str(i + 1) +
+                        " → **" +
+                        cached['category'] +
+                        "**")
+
+        # ➕ Add another concern button
+        if (st.session_state['num_concerns']
+                < MAX_CONCERNS):
+            if st.button(
+                "➕ Add another concern"):
+                st.session_state[
+                    'num_concerns'] += 1
+                st.rerun()
+
+        # Build a flat list of all classified
+        # concerns for downstream use
+        all_concerns = [
+            v for v in
+            st.session_state[
+                'concerns_cache'].values()
+            if v.get('text', '').strip()
+            and v.get('category')]
+
+        # Persist Marketing/Customer unlock
+        # across reruns from any concern slot
+        for c in all_concerns:
+            if (c['category'] ==
                     "Customer / Marketing"
-                    and not
-                    concern_marketing):
-                    st.success(
-                        "✅ Good news — "
-                        "Marketing Dokku "
-                        "covers this. "
-                        "We've added it "
-                        "to your selected "
-                        "areas!!")
-                    concern_areas.append(
-                        "Customer / "
-                        "Marketing "
-                        "(from symptom)")
-                    concern_marketing = (
-                        True)
-
-        # Persist symptom classification across
-        # reruns (e.g. user checks another box
-        # after already classifying a symptom)
-        if (st.session_state.get(
-            'symptom_category') ==
-            "Customer / Marketing"
-            and not concern_marketing):
-            concern_marketing = True
-            if ("Customer / Marketing "
-                "(from symptom)" not in
-                concern_areas):
-                concern_areas.append(
+                    and not concern_marketing):
+                concern_marketing = True
+                label_str = (
                     "Customer / Marketing "
-                    "(from symptom)")
+                    "(from concern: \"" +
+                    c['text'][:40] +
+                    "...\")")
+                if label_str not in (
+                        concern_areas):
+                    concern_areas.append(
+                        label_str)
+
+        # Keep backward-compat keys so DOC
+        # Summary and S-TEST still work
+        # (use first classified concern)
+        if all_concerns:
+            st.session_state[
+                'open_symptom_text'] = (
+                all_concerns[0]['text'])
+            st.session_state[
+                'symptom_category'] = (
+                all_concerns[0]['category'])
+            # Store full list for S-TEST loop
+            st.session_state[
+                'all_concerns'] = (
+                all_concerns)
+        else:
+            st.session_state[
+                'all_concerns'] = []
 
         proceed_to_doc = False
 
@@ -391,25 +440,27 @@ Reply with ONLY the """
     **📊 Secondary Dept:** {dept_secondary}
                 """)
             with col2:
-                symptom_text = (
-                    st.session_state.get(
-                        'open_symptom_text', ''))
-                symptom_cat = (
-                    st.session_state.get(
-                        'symptom_category', ''))
-                symptom_line = ""
-                if symptom_text:
-                    symptom_line = (
-                        "\n\n**🩺 Other Concern "
-                        "(your words):** \"" +
-                        symptom_text + "\"" +
-                        "\n\n**→ Classified as:** "
-                        + symptom_cat)
+                all_c = st.session_state.get(
+                    'all_concerns', [])
+                concerns_line = ""
+                if all_c:
+                    concerns_line = (
+                        "\n\n**🩺 Additional "
+                        "Concerns:**")
+                    for ci, cv in enumerate(
+                            all_c):
+                        concerns_line += (
+                            "\n" +
+                            str(ci+1) + ". \"" +
+                            cv.get('text','') +
+                            "\" → *" +
+                            cv.get('category','')
+                            + "*")
                 st.info(f"""
     **📅 Data Age:** {data_age}
 
     **🔄 DX History:** {dx_history}
-    {symptom_line}
+    {concerns_line}
                 """)
 
             st.markdown("---")
@@ -678,23 +729,14 @@ Reply with ONLY the """
                                     f" revenue at risk",
                                 "flag": "🔴 RED"})
 
-                    # SYMPTOM TEST: AI-interpreted
-                    # test for the open symptom the
-                    # user described in their own
-                    # words (Step 0). Unlike TEST
-                    # 1-4 and adaptive tests, this
-                    # has no fixed statistical
-                    # threshold — it's Claude
-                    # reading a compact summary of
-                    # the actual uploaded data
-                    # alongside the symptom text,
-                    # like a specialized clinic test
-                    # ordered for a specific patient
-                    # complaint.
-                    symptom_text_for_test = (
+                    # SYMPTOM TESTS: one per
+                    # concern the user described
+                    # in Step 0. Each gets its
+                    # own S-TEST entry in results.
+                    all_concerns_for_test = (
                         st.session_state.get(
-                            'open_symptom_text', ''))
-                    if symptom_text_for_test:
+                            'all_concerns', []))
+                    if all_concerns_for_test:
                         try:
                             total_rev_val = (
                                 df['Total-Amt']
@@ -720,7 +762,6 @@ Reply with ONLY the """
                                     + " · "
                                     "Inactive: " +
                                     str(inactive))
-
                             api_key = (
                                 os.environ.get(
                                     "ANTHROPIC_"
@@ -729,67 +770,87 @@ Reply with ONLY the """
                                 anthropic.Anthropic(
                                     api_key=
                                     api_key))
-                            prompt_text = (
-                                "A company "
-                                "described this "
-                                "concern: \"" +
-                                symptom_text_for_test
-                                + "\"\n\nHere is a "
-                                "summary of their "
-                                "actual data:\n" +
-                                data_summary +
-                                "\n\nIn 1-2 short "
-                                "sentences, does "
-                                "this data give "
-                                "any evidence "
-                                "relevant to "
-                                "their concern? "
-                                "Be specific and "
-                                "factual — only "
-                                "use what's in "
-                                "the summary "
-                                "above. If the "
-                                "summary doesn't "
-                                "have enough "
-                                "detail to say "
-                                "anything useful, "
-                                "say so plainly.")
-                            msg = (
-                                client.messages
-                                .create(
-                                model=
-                                "claude-opus-4-5",
-                                max_tokens=200,
-                                messages=[{
-                                    "role":
-                                    "user",
-                                    "content":
-                                    prompt_text
-                                }]))
-                            symptom_finding = (
-                                msg.content[0]
-                                .text.strip())
-                            pain_points.append({
-                                "test":
-                                "Your Reported "
-                                "Concern (AI "
-                                "Review)",
-                                "finding":
-                                symptom_finding,
-                                "flag":
-                                "🟡 YELLOW"})
+                            for idx, c in enumerate(
+                                all_concerns_for_test):
+                                c_text = (
+                                    c.get(
+                                        'text', ''))
+                                c_cat = (
+                                    c.get(
+                                        'category',
+                                        ''))
+                                test_name = (
+                                    "Your Concern "
+                                    + str(idx+1) +
+                                    " — AI Review")
+                                prompt_text = (
+                                    "A company "
+                                    "described "
+                                    "this concern:"
+                                    " \"" +
+                                    c_text +
+                                    "\"\n(Classified"
+                                    " as: " +
+                                    c_cat +
+                                    ")\n\nHere is "
+                                    "a summary of "
+                                    "their actual "
+                                    "data:\n" +
+                                    data_summary +
+                                    "\n\nIn 1-2 "
+                                    "short sentences"
+                                    ", does this "
+                                    "data give any "
+                                    "evidence "
+                                    "relevant to "
+                                    "their concern?"
+                                    " Be specific "
+                                    "and factual. "
+                                    "If the summary"
+                                    " doesn't have "
+                                    "enough detail,"
+                                    " say so "
+                                    "plainly.")
+                                try:
+                                    msg = (
+                                        client
+                                        .messages
+                                        .create(
+                                        model=
+                                        "claude-"
+                                        "opus-4-5",
+                                        max_tokens=
+                                        200,
+                                        messages=[{
+                                            "role":
+                                            "user",
+                                            "content"
+                                            :
+                                            prompt_text
+                                        }]))
+                                    finding = (
+                                        msg
+                                        .content[0]
+                                        .text
+                                        .strip())
+                                except Exception:
+                                    finding = (
+                                        "Could not "
+                                        "run AI "
+                                        "review.")
+                                pain_points.append(
+                                    {
+                                    "test":
+                                        test_name,
+                                    "finding":
+                                        finding,
+                                    "flag":
+                                        "🟡 YELLOW"
+                                    })
                         except Exception as e:
-                            pain_points.append({
-                                "test":
-                                "Your Reported "
-                                "Concern (AI "
-                                "Review)",
-                                "finding":
-                                "Could not run "
-                                "AI review right "
-                                "now: " + str(e),
-                                "flag":
-                                "🟡 YELLOW"})
+                            st.warning(
+                                "S-TEST error: "
+                                + str(e))
 
                     # ── SHOW RESULTS ──
                     st.markdown("---")
@@ -935,10 +996,8 @@ Reply with ONLY the """
                         if p["test"] not in [
                             t["name"] for t in test_details]:
                             is_symptom_test = (
-                                p["test"] ==
-                                "Your Reported "
-                                "Concern (AI "
-                                "Review)")
+                                "AI Review"
+                                in p["test"])
                             test_details.append({
                                 "label":
                                 "S-TEST" if
