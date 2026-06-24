@@ -12,14 +12,14 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jun 21, 2026-->dxpo_app (29) version
+# Header Jun 24, 2026-->dxpo_app (30) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization")
+    "Process Optimization ver(30)")
 st.markdown("---")
 
 # ── STEP 1: FILE UPLOAD ──
