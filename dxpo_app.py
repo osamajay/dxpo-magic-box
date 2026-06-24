@@ -127,8 +127,16 @@ if uploaded_file is not None:
 
         symptom_category = None
         if open_symptom and open_symptom.strip():
-            if st.button(
-                "🔍 Check this symptom"):
+            # Auto-classify whenever the text
+            # changes — no separate button click
+            # needed. Cache against the exact text
+            # so we don't re-call the API on every
+            # unrelated rerun (e.g. checking other
+            # boxes).
+            already_classified_text = (
+                st.session_state.get(
+                    'open_symptom_text', ''))
+            if open_symptom != already_classified_text:
                 with st.spinner(
                     "🩺 Reviewing your symptom..."):
                     try:
@@ -176,32 +184,38 @@ Reply with ONLY the """
                         st.session_state[
                             'open_symptom_text'] = (
                             open_symptom)
-                        st.info(
-                            f"🩺 This sounds like "
-                            f"it falls under: "
-                            f"**{symptom_category}**")
-                        if (symptom_category ==
-                            "Customer / Marketing"
-                            and not
-                            concern_marketing):
-                            st.success(
-                                "✅ Good news — "
-                                "Marketing Dokku "
-                                "covers this. "
-                                "We've added it "
-                                "to your selected "
-                                "areas!!")
-                            concern_areas.append(
-                                "Customer / "
-                                "Marketing "
-                                "(from symptom)")
-                            concern_marketing = (
-                                True)
                     except Exception as e:
                         st.warning(
                             f"Could not classify "
                             f"symptom right now: "
                             f"{e}")
+            else:
+                symptom_category = (
+                    st.session_state.get(
+                        'symptom_category'))
+
+            if symptom_category:
+                st.info(
+                    f"🩺 This sounds like "
+                    f"it falls under: "
+                    f"**{symptom_category}**")
+                if (symptom_category ==
+                    "Customer / Marketing"
+                    and not
+                    concern_marketing):
+                    st.success(
+                        "✅ Good news — "
+                        "Marketing Dokku "
+                        "covers this. "
+                        "We've added it "
+                        "to your selected "
+                        "areas!!")
+                    concern_areas.append(
+                        "Customer / "
+                        "Marketing "
+                        "(from symptom)")
+                    concern_marketing = (
+                        True)
 
         # Persist symptom classification across
         # reruns (e.g. user checks another box
