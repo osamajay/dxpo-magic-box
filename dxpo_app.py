@@ -12,7 +12,7 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jun 24, 2026-->dxpo_app (31-reset to 29 at Urasa PC) version
+# Header Jun 27, 2026-->dxpo_app (31-reset to 29 at Urasa PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
