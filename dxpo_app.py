@@ -12,55 +12,222 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jun 24, 2026-->dxpo_app (31) version
+# Header Jun 24, 2026-->dxpo_app (31-reset to 29 at Urasa PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(31)")
+    "Process Optimization ver(29-jun272026-1106pm)")
 st.markdown("---")
 
 # ── STEP 1: FILE UPLOAD ──
 st.subheader("📂 Step 1 — Upload Your Data")
-uploaded_file = st.file_uploader(
-    "Upload Excel or CSV file",
-    type=["xlsx","xls","xlsm","csv"])
+st.caption(
+    "Upload up to 3 files (Excel or CSV). "
+    "DXPO MB will auto-detect what each file "
+    "contains — you can confirm or override!!")
 
-if uploaded_file is not None:
-    try:
-        if uploaded_file.name.endswith(".csv"):
-            df = pd.read_csv(uploaded_file)
-            st.success(
-                f"✅ Loaded: {uploaded_file.name}")
+MAX_FILES = 3
+
+def detect_file_type(df):
+    """Auto-detect which Dokku module a
+    dataframe belongs to based on column
+    fingerprints. Returns a category string."""
+    cols = " ".join(
+        c.lower() for c in df.columns)
+    if any(k in cols for k in [
+        'total-amt','amount','revenue',
+        'spend','price','unit-price',
+        'customer','status','channel',
+        'payment']):
+        return "Customer / Marketing"
+    if any(k in cols for k in [
+        'defect','downtime','machine',
+        'units-produced','maintenance',
+        'operating-temp','product-code']):
+        return "Operations / Quality"
+    if any(k in cols for k in [
+        'employee','headcount','salary',
+        'attendance','performance',
+        'department','hire-date']):
+        return "HR / Workforce"
+    if any(k in cols for k in [
+        'budget','profit','expense',
+        'cost','invoice','ledger']):
+        return "Finance"
+    return "Unknown — please select below"
+
+MODULE_OPTIONS = [
+    "Customer / Marketing",
+    "Operations / Quality",
+    "HR / Workforce",
+    "Finance",
+    "Unknown — please select below"
+]
+
+# Render up to 3 upload slots
+uploaded_files = []
+for fi in range(MAX_FILES):
+    label = (
+        "📁 File 1 (required)"
+        if fi == 0 else
+        f"📁 File {fi+1} (optional)")
+    uf = st.file_uploader(
+        label,
+        type=["xlsx","xls","xlsm","csv"],
+        key=f"uploader_{fi}")
+    if uf is not None:
+        uploaded_files.append(uf)
+
+if not uploaded_files:
+    st.info(
+        "☝️ Please upload at least one "
+        "file to begin.")
+
+# Process each uploaded file
+loaded = []   # list of dicts:
+              # {name, df, detected, assigned}
+
+if uploaded_files:
+    st.markdown("---")
+    st.markdown(
+        "**🔍 File Detection & Assignment**")
+
+    for fi, uf in enumerate(uploaded_files):
+        try:
+            if uf.name.endswith(".csv"):
+                raw_df = pd.read_csv(uf)
+            else:
+                xl = pd.ExcelFile(uf)
+                sheets = xl.sheet_names
+                if len(sheets) > 1:
+                    sheet = st.selectbox(
+                        f"Sheet for "
+                        f"{uf.name}:",
+                        sheets,
+                        key=f"sheet_{fi}")
+                else:
+                    sheet = sheets[0]
+                raw_df = pd.read_excel(
+                    uf,
+                    sheet_name=sheet)
+
+            detected = detect_file_type(raw_df)
+
+            col_a, col_b = st.columns([2,2])
+            with col_a:
+                st.success(
+                    f"✅ **{uf.name}** — "
+                    f"{raw_df.shape[0]:,} rows, "
+                    f"{raw_df.shape[1]} cols")
+                st.caption(
+                    f"🩺 Auto-detected as: "
+                    f"**{detected}**")
+            with col_b:
+                assigned = st.selectbox(
+                    f"Confirm or change "
+                    f"type for file {fi+1}:",
+                    MODULE_OPTIONS,
+                    index=MODULE_OPTIONS.index(
+                        detected)
+                    if detected in
+                    MODULE_OPTIONS else 4,
+                    key=f"assign_{fi}")
+
+            loaded.append({
+                "name":     uf.name,
+                "df":       raw_df,
+                "detected": detected,
+                "assigned": assigned})
+
+        except Exception as e:
+            st.error(
+                f"❌ Could not load "
+                f"{uf.name}: {e}")
+
+# ── MERGE SAME-STRUCTURE FILES ──────────────
+# Group by assigned module; if >1 file shares
+# the same module AND has matching columns,
+# merge them into one combined df.
+marketing_dfs = [
+    l for l in loaded
+    if l["assigned"] == "Customer / Marketing"]
+ops_dfs = [
+    l for l in loaded
+    if l["assigned"] == "Operations / Quality"]
+
+def try_merge(df_list):
+    """Merge a list of same-assigned dfs if
+    their columns match. Returns one df."""
+    if not df_list:
+        return None
+    if len(df_list) == 1:
+        return df_list[0]["df"]
+    base_cols = set(df_list[0]["df"].columns)
+    compatible = [df_list[0]["df"]]
+    for item in df_list[1:]:
+        if set(item["df"].columns) == base_cols:
+            compatible.append(item["df"])
         else:
-            xl = pd.ExcelFile(uploaded_file)
-            sheets = xl.sheet_names
-            sheet = st.selectbox(
-                "Select sheet:", sheets)
-            df = pd.read_excel(
-                uploaded_file,
-                sheet_name=sheet)
-            st.success(
-                f"✅ Loaded sheet: {sheet}")
+            st.warning(
+                f"⚠️ {item['name']} has "
+                f"different columns — "
+                f"kept separate, not merged.")
+    if len(compatible) > 1:
+        merged = pd.concat(
+            compatible,
+            ignore_index=True)
+        st.success(
+            f"🔗 Merged {len(compatible)} "
+            f"files into one combined "
+            f"dataset ({len(merged):,} rows)")
+        return merged
+    return compatible[0]
 
-        col1,col2,col3 = st.columns(3)
-        with col1:
-            st.metric("Rows",
-                f"{df.shape[0]:,}")
-        with col2:
-            st.metric("Columns",
-                df.shape[1])
-        with col3:
-            st.metric("Missing",
-                df.isnull().sum().sum())
+# Build the primary df for Marketing Dokku
+# (the only active Dokku right now)
+df = None
+if marketing_dfs:
+    df = try_merge(marketing_dfs)
+elif loaded:
+    # No marketing file — use first file
+    # anyway so preview still works;
+    # data-gap check will warn the user
+    df = loaded[0]["df"]
 
-        with st.expander("👀 Preview Data"):
-            st.dataframe(df.head(10),
-                use_container_width=True)
+# Show ops/quality files as coming soon
+if ops_dfs:
+    for item in ops_dfs:
+        st.info(
+            f"🚧 **{item['name']}** detected "
+            f"as Operations/Quality data — "
+            f"this Dokku module is coming "
+            f"soon!! Your file is ready "
+            f"and waiting.")
 
-        st.markdown("---")
+# Show combined preview if we have a df
+if df is not None:
+    col1,col2,col3 = st.columns(3)
+    with col1:
+        st.metric("Rows",
+            f"{df.shape[0]:,}")
+    with col2:
+        st.metric("Columns",
+            df.shape[1])
+    with col3:
+        st.metric("Missing",
+            df.isnull().sum().sum())
+
+    with st.expander("👀 Preview Data"):
+        st.dataframe(df.head(10),
+            use_container_width=True)
+
+    st.markdown("---")
+
+if df is not None:
+    try:
 
         # ── STEP 0: PRE-VISIT QUESTIONNAIRE ──
         st.subheader(
