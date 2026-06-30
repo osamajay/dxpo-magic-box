@@ -12,14 +12,14 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jun 27, 2026-->dxpo_app (31-reset to 29 at Urasa PC) version
+# Header Jul 01, 2026-->dxpo_app (32) in Higashi-PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(29-jun272026-1106pm)")
+    "Process Optimization ver(32)jul012026-00:17)")
 st.markdown("---")
 
 # ── STEP 1: FILE UPLOAD ──
@@ -136,6 +136,12 @@ if uploaded_files:
                     MODULE_OPTIONS else 4,
                     key=f"assign_{fi}")
 
+            with st.expander(
+                f"👀 Preview: {uf.name}"):
+                st.dataframe(
+                    raw_df.head(10),
+                    use_container_width=True)
+
             loaded.append({
                 "name":     uf.name,
                 "df":       raw_df,
@@ -187,28 +193,25 @@ def try_merge(df_list):
     return compatible[0]
 
 # Build the primary df for Marketing Dokku
-# (the only active Dokku right now)
 df = None
 if marketing_dfs:
     df = try_merge(marketing_dfs)
-elif loaded:
-    # No marketing file — use first file
-    # anyway so preview still works;
-    # data-gap check will warn the user
+elif loaded and not ops_dfs:
+    # No marketing file and no ops file —
+    # use first file anyway so preview still
+    # works; data-gap check will warn the user
     df = loaded[0]["df"]
 
-# Show ops/quality files as coming soon
+# Build the primary df for Operations/Quality
+# Dokku
+ops_df = None
 if ops_dfs:
-    for item in ops_dfs:
-        st.info(
-            f"🚧 **{item['name']}** detected "
-            f"as Operations/Quality data — "
-            f"this Dokku module is coming "
-            f"soon!! Your file is ready "
-            f"and waiting.")
+    ops_df = try_merge(ops_dfs)
 
 # Show combined preview if we have a df
 if df is not None:
+    st.markdown(
+        "**📊 Combined Dataset for Analysis**")
     col1,col2,col3 = st.columns(3)
     with col1:
         st.metric("Rows",
@@ -220,7 +223,9 @@ if df is not None:
         st.metric("Missing",
             df.isnull().sum().sum())
 
-    with st.expander("👀 Preview Data"):
+    with st.expander(
+        "👀 Preview: Final Combined Dataset "
+        "(used for analysis)"):
         st.dataframe(df.head(10),
             use_container_width=True)
 
@@ -449,76 +454,108 @@ if df is not None:
                 'all_concerns'] = []
 
         proceed_to_doc = False
+        proceed_to_ops = False
 
         if not concern_areas:
             st.warning(
                 "☝️ Please select at least one "
                 "concern area to continue.")
-        elif concern_marketing:
-            # ── DATA GAP CHECK ──
-            # Lightweight check: does this file
-            # look like it has ANY
-            # customer/marketing-relevant
-            # columns? (amount, status, customer
-            # id, or channel-like). Mirrors (but
-            # does not duplicate) the stricter
-            # detection Step 3 runs later.
-            cols_lower = [
-                c.lower() for c in df.columns]
-            has_amount = any(
-                'amt' in c or 'amount' in c or
-                'price' in c or 'revenue' in c or
-                'spend' in c
-                for c in cols_lower)
-            has_status = any(
-                'status' in c for c in cols_lower)
-            has_customer_id = any(
-                'customer' in c or 'client' in c
-                for c in cols_lower)
-            has_channel = any(
-                'channel' in c or 'internet' in c
-                or 'online' in c
-                for c in cols_lower)
-
-            data_looks_relevant = (
-                has_amount or has_status or
-                has_customer_id or has_channel)
-
-            if not data_looks_relevant:
-                st.warning(
-                    "🔬 **Data Gap Detected** — "
-                    "your uploaded file doesn't "
-                    "look like it has "
-                    "customer/marketing data "
-                    "(no amount, status, "
-                    "customer ID, or channel "
-                    "columns found).")
-                st.markdown(
-                    "Like a specialized clinic "
-                    "test, this needs data we "
-                    "don't have yet. To run "
-                    "Marketing Dokku properly, "
-                    "please go get a dataset "
-                    "with columns such as:\n"
-                    "- Customer ID / name\n"
-                    "- Purchase amount / "
-                    "revenue per transaction\n"
-                    "- Customer status "
-                    "(Active/Inactive)\n"
-                    "- Order channel "
-                    "(online/in-store)\n\n"
-                    "You can still proceed with "
-                    "what you have, but results "
-                    "may be limited.")
-
-            st.success(
-                "✅ Marketing Dokku is ready for "
-                "your selected concern area(s)!!")
-            proceed_to_doc = True
         else:
-            st.info(
-                "🚧 This module is coming soon — "
-                "Marketing Dokku is available now!!")
+            if concern_marketing:
+                # ── DATA GAP CHECK (Marketing) ──
+                cols_lower = [
+                    c.lower() for c in df.columns]
+                has_amount = any(
+                    'amt' in c or 'amount' in c or
+                    'price' in c or 'revenue' in c
+                    or 'spend' in c
+                    for c in cols_lower)
+                has_status = any(
+                    'status' in c
+                    for c in cols_lower)
+                has_customer_id = any(
+                    'customer' in c or
+                    'client' in c
+                    for c in cols_lower)
+                has_channel = any(
+                    'channel' in c or
+                    'internet' in c or
+                    'online' in c
+                    for c in cols_lower)
+
+                data_looks_relevant = (
+                    has_amount or has_status or
+                    has_customer_id or
+                    has_channel)
+
+                if not data_looks_relevant:
+                    st.warning(
+                        "🔬 **Data Gap Detected** "
+                        "— your uploaded file "
+                        "doesn't look like it "
+                        "has customer/marketing "
+                        "data (no amount, "
+                        "status, customer ID, "
+                        "or channel columns "
+                        "found).")
+                    st.markdown(
+                        "Like a specialized "
+                        "clinic test, this needs"
+                        " data we don't have "
+                        "yet. To run Marketing "
+                        "Dokku properly, please "
+                        "go get a dataset with "
+                        "columns such as:\n"
+                        "- Customer ID / name\n"
+                        "- Purchase amount / "
+                        "revenue per "
+                        "transaction\n"
+                        "- Customer status "
+                        "(Active/Inactive)\n"
+                        "- Order channel "
+                        "(online/in-store)\n\n"
+                        "You can still proceed "
+                        "with what you have, "
+                        "but results may be "
+                        "limited.")
+
+                st.success(
+                    "✅ Marketing Dokku is "
+                    "ready for your selected "
+                    "concern area(s)!!")
+                proceed_to_doc = True
+
+            if concern_ops:
+                # ── DATA GAP CHECK (Ops) ──
+                if ops_df is None:
+                    st.warning(
+                        "🔬 **Data Gap Detected** "
+                        "— you flagged Supply "
+                        "chain/Operations as a "
+                        "concern, but no "
+                        "uploaded file was "
+                        "detected as Operations"
+                        "/Quality data. Please "
+                        "go get production, "
+                        "machine, or process "
+                        "data and upload it.")
+                else:
+                    st.success(
+                        "✅ Operations/Quality "
+                        "Dokku is ready for "
+                        "your selected concern "
+                        "area(s)!!")
+                    proceed_to_doc = True
+                    proceed_to_ops = True
+
+            if not proceed_to_doc and not (
+                    concern_marketing or
+                    concern_ops):
+                st.info(
+                    "🚧 This module is coming "
+                    "soon — Marketing Dokku "
+                    "and Operations/Quality "
+                    "Dokku are available now!!")
 
         st.markdown("---")
 
@@ -744,15 +781,26 @@ if df is not None:
             st.markdown("---")
 
             # ── STEP 3: RUN ANALYSIS ──
-            if st.button(
-                "🔬 Run Marketing Dokku + "
-                "Generate DXPO Report!!",
-                type="primary",
-                use_container_width=True):
-                st.session_state.run_analysis = True
+            if concern_marketing:
+                if st.button(
+                    "🔬 Run Marketing Dokku + "
+                    "Generate DXPO Report!!",
+                    type="primary",
+                    use_container_width=True):
+                    st.session_state.run_analysis = True
 
-            if st.session_state.get(
-                'run_analysis', False):
+            if proceed_to_ops:
+                if st.button(
+                    "🏭 Run Operations/Quality "
+                    "Dokku + Generate DXPO "
+                    "Report!!",
+                    type="primary",
+                    use_container_width=True):
+                    st.session_state.run_ops_analysis = True
+
+            if concern_marketing and (
+                st.session_state.get(
+                'run_analysis', False)):
 
                 with st.spinner(
                     "🪄 Analyzing your data..."):
@@ -1698,6 +1746,354 @@ if df is not None:
                     st.success(
                         "✅ Analysis complete!!")
                     st.balloons()
+
+            # ══════════════════════════════════
+            # OPERATIONS / QUALITY DOKKU
+            # ══════════════════════════════════
+            if proceed_to_ops and (
+                st.session_state.get(
+                'run_ops_analysis', False)):
+
+                with st.spinner(
+                    "🏭 Analyzing your "
+                    "production data..."):
+
+                    odf = ops_df.copy()
+                    on = len(odf)
+
+                    # ── Column detection ──
+                    machine_col = None
+                    defect_col = None
+                    downtime_col = None
+                    temp_col = None
+                    maint_col = None
+                    shift_col_name = None
+                    produced_col = None
+
+                    for c in odf.columns:
+                        cl = c.lower()
+                        if 'machine' in cl:
+                            machine_col = c
+                        elif 'defect' in cl and (
+                                'rate' in cl):
+                            defect_col = c
+                        elif 'downtime' in cl:
+                            downtime_col = c
+                        elif 'temp' in cl:
+                            temp_col = c
+                        elif 'maintenance' in cl:
+                            maint_col = c
+                        elif 'shift' in cl:
+                            shift_col_name = c
+                        elif 'produced' in cl:
+                            produced_col = c
+
+                    ops_pain_points = []
+
+                    # TEST O1: Defect Rate
+                    # by Machine
+                    if machine_col and defect_col:
+                        by_mach = (
+                            odf.groupby(
+                                machine_col)[
+                                defect_col]
+                            .mean()
+                            .sort_values(
+                                ascending=False))
+                        worst_mach = (
+                            by_mach.index[0])
+                        worst_rate = (
+                            by_mach.iloc[0])
+                        avg_rate = (
+                            odf[defect_col]
+                            .mean())
+                        flag = (
+                            "🔴 RED" if
+                            worst_rate > 10 else
+                            "🟡 YELLOW" if
+                            worst_rate > 5 else
+                            "🟢 GREEN")
+                        ops_pain_points.append({
+                            "test":
+                            "Defect Rate by "
+                            "Machine",
+                            "finding":
+                            f"Machine "
+                            f"{worst_mach} has "
+                            f"the highest "
+                            f"average defect "
+                            f"rate at "
+                            f"{worst_rate:.1f}%, "
+                            f"vs overall "
+                            f"average of "
+                            f"{avg_rate:.1f}%.",
+                            "flag": flag})
+
+                    # TEST O2: Downtime
+                    # by Shift
+                    if (shift_col_name and
+                            downtime_col):
+                        by_shift = (
+                            odf.groupby(
+                                shift_col_name)[
+                                downtime_col]
+                            .mean()
+                            .sort_values(
+                                ascending=False))
+                        worst_shift = (
+                            by_shift.index[0])
+                        worst_dt = (
+                            by_shift.iloc[0])
+                        avg_dt = (
+                            odf[downtime_col]
+                            .mean())
+                        flag = (
+                            "🔴 RED" if
+                            worst_dt > 60 else
+                            "🟡 YELLOW" if
+                            worst_dt > 30 else
+                            "🟢 GREEN")
+                        ops_pain_points.append({
+                            "test":
+                            "Downtime by "
+                            "Shift",
+                            "finding":
+                            f"{worst_shift} "
+                            f"shift averages "
+                            f"{worst_dt:.0f} "
+                            f"minutes of "
+                            f"downtime, vs "
+                            f"overall average "
+                            f"of {avg_dt:.0f} "
+                            f"minutes.",
+                            "flag": flag})
+
+                    # TEST O3: Temperature
+                    # correlation with
+                    # defects
+                    if temp_col and defect_col:
+                        corr = (
+                            odf[[temp_col,
+                                 defect_col]]
+                            .corr()
+                            .iloc[0,1])
+                        flag = (
+                            "🔴 RED" if
+                            corr > 0.6 else
+                            "🟡 YELLOW" if
+                            corr > 0.3 else
+                            "🟢 GREEN")
+                        ops_pain_points.append({
+                            "test":
+                            "Temperature / "
+                            "Defect "
+                            "Correlation",
+                            "finding":
+                            f"Operating "
+                            f"temperature and "
+                            f"defect rate show "
+                            f"a correlation of "
+                            f"{corr:.2f} "
+                            f"(1.0 = perfect "
+                            f"link). Higher "
+                            f"values suggest "
+                            f"temperature "
+                            f"control may be "
+                            f"contributing to "
+                            f"quality issues.",
+                            "flag": flag})
+
+                    # TEST O4: Maintenance
+                    # Flag Frequency
+                    if maint_col:
+                        maint_pct = (
+                            (odf[maint_col]
+                             =='YES').sum()
+                            / on * 100)
+                        flag = (
+                            "🔴 RED" if
+                            maint_pct > 20 else
+                            "🟡 YELLOW" if
+                            maint_pct > 10 else
+                            "🟢 GREEN")
+                        ops_pain_points.append({
+                            "test":
+                            "Maintenance "
+                            "Flag Frequency",
+                            "finding":
+                            f"{maint_pct:.1f}% "
+                            f"of production "
+                            f"records were "
+                            f"flagged for "
+                            f"maintenance "
+                            f"attention — "
+                            f"worth reviewing "
+                            f"preventive "
+                            f"maintenance "
+                            f"scheduling.",
+                            "flag": flag})
+
+                    # TEST O5: Overall
+                    # Production Volume
+                    if produced_col:
+                        total_units = (
+                            odf[produced_col]
+                            .sum())
+                        avg_units = (
+                            odf[produced_col]
+                            .mean())
+                        ops_pain_points.append({
+                            "test":
+                            "Production "
+                            "Volume Overview",
+                            "finding":
+                            f"Total units "
+                            f"produced: "
+                            f"{total_units:,.0f}"
+                            f" across "
+                            f"{on:,} records "
+                            f"(avg "
+                            f"{avg_units:.0f} "
+                            f"units/record).",
+                            "flag":
+                            "🟢 GREEN"})
+
+                    # ── SHOW RESULTS ──
+                    st.markdown("---")
+                    st.subheader(
+                        "🏭 Step 3 — "
+                        "Operations/Quality "
+                        "Dokku Results")
+
+                    red_o = [p for p in
+                        ops_pain_points
+                        if 'RED' in p['flag']]
+                    yel_o = [p for p in
+                        ops_pain_points
+                        if 'YELLOW' in
+                        p['flag']]
+
+                    oc1,oc2,oc3 = st.columns(3)
+                    with oc1:
+                        st.metric(
+                            "Total Pain Points",
+                            len(ops_pain_points))
+                    with oc2:
+                        st.metric(
+                            "🔴 Critical",
+                            len(red_o))
+                    with oc3:
+                        st.metric(
+                            "🟡 Watch",
+                            len(yel_o))
+
+                    why_ops = {
+                        "Defect Rate by "
+                        "Machine":
+                        "Standard test — "
+                        "identifies which "
+                        "machine is driving "
+                        "quality issues!!",
+                        "Downtime by Shift":
+                        "Standard test — "
+                        "identifies "
+                        "operational "
+                        "inefficiency "
+                        "patterns by shift"
+                        "!!",
+                        "Temperature / "
+                        "Defect Correlation":
+                        "Standard test — "
+                        "checks if "
+                        "environmental "
+                        "factors are "
+                        "linked to defects"
+                        "!!",
+                        "Maintenance Flag "
+                        "Frequency":
+                        "Standard test — "
+                        "flags how often "
+                        "equipment needs "
+                        "attention!!",
+                        "Production Volume "
+                        "Overview":
+                        "Standard test — "
+                        "baseline context "
+                        "for production "
+                        "capacity!!"
+                    }
+
+                    for p in ops_pain_points:
+                        icon = (
+                            "🔴" if 'RED' in
+                            p['flag'] else
+                            "🟡" if 'YELLOW'
+                            in p['flag'] else
+                            "🟢")
+                        with st.expander(
+                            f"{icon} "
+                            f"{p['test']} — "
+                            f"{p['flag']}"):
+                            st.write(
+                                "**Why "
+                                "Tested:** " +
+                                why_ops.get(
+                                p['test'],
+                                "Standard "
+                                "test."))
+                            st.write(
+                                "**Finding:** "
+                                + p['finding'])
+
+                    st.markdown("---")
+                    st.markdown(
+                        "### 📊 "
+                        "Operations/Quality "
+                        "Dokku — Complete "
+                        "Test Results")
+                    ops_table_rows = (
+                        [[p['test'],
+                          'Standard',
+                          p['finding'],
+                          p['flag']]
+                         for p in
+                         ops_pain_points])
+                    if ops_table_rows:
+                        ops_fig = go.Figure(
+                            data=[go.Table(
+                            header=dict(
+                                values=[
+                                "Test","Type",
+                                "Finding",
+                                "Status"],
+                                fill_color=
+                                '#1F4E79',
+                                font=dict(
+                                    color=
+                                    'white',
+                                    size=12),
+                                align='left'),
+                            cells=dict(
+                                values=list(
+                                    zip(
+                                    *ops_table_rows)),
+                                fill_color=
+                                'lavender',
+                                align='left'))
+                        ])
+                        ops_fig.update_layout(
+                            height=300)
+                        st.plotly_chart(
+                            ops_fig,
+                            use_container_width=
+                            True)
+
+                    st.success(
+                        "✅ Operations/"
+                        "Quality analysis "
+                        "complete!!")
+
+            # End of Operations Dokku block
 
     except Exception as e:
         st.error(f"❌ Error: {e}")
