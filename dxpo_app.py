@@ -12,14 +12,14 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jul 01, 2026-->dxpo_app (32) in Higashi-PC) version
+# Header Jul 01, 2026-->dxpo_app (33) in Higashi-PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(32)jul012026-00:17)")
+    "Process Optimization ver(33)jul012026-00:41)")
 st.markdown("---")
 
 # ── STEP 1: FILE UPLOAD ──
@@ -164,38 +164,88 @@ ops_dfs = [
     l for l in loaded
     if l["assigned"] == "Operations / Quality"]
 
-def try_merge(df_list):
-    """Merge a list of same-assigned dfs if
-    their columns match. Returns one df."""
+def try_merge(df_list, module_label):
+    """When 2+ same-assigned files have
+    matching columns, ASK the user explicitly
+    whether to merge them or keep separate —
+    no default choice, since merging is not
+    always correct (e.g. different reporting
+    periods, files the user wants compared
+    side-by-side rather than blended)."""
     if not df_list:
         return None
     if len(df_list) == 1:
         return df_list[0]["df"]
+
     base_cols = set(df_list[0]["df"].columns)
-    compatible = [df_list[0]["df"]]
+    compatible = [df_list[0]]
+    incompatible = []
     for item in df_list[1:]:
         if set(item["df"].columns) == base_cols:
-            compatible.append(item["df"])
+            compatible.append(item)
         else:
+            incompatible.append(item)
             st.warning(
                 f"⚠️ {item['name']} has "
-                f"different columns — "
-                f"kept separate, not merged.")
-    if len(compatible) > 1:
+                f"different columns from "
+                f"the other {module_label} "
+                f"file(s) — kept separate, "
+                f"not merged.")
+
+    if len(compatible) <= 1:
+        return compatible[0]["df"]
+
+    names_str = ", ".join(
+        c["name"] for c in compatible)
+    st.markdown(
+        f"**🔗 {len(compatible)} files "
+        f"assigned to {module_label} have "
+        f"matching columns:** {names_str}")
+    choice = st.radio(
+        f"How should these "
+        f"{len(compatible)} files be "
+        f"used for {module_label}?",
+        [
+            "⏸️ Please choose",
+            "✅ Merge into one combined "
+            "dataset",
+            "📁 Keep separate — use first "
+            "file only for now"
+        ],
+        index=0,
+        key=f"merge_choice_{module_label}")
+
+    if choice == "✅ Merge into one combined dataset":
         merged = pd.concat(
-            compatible,
+            [c["df"] for c in compatible],
             ignore_index=True)
         st.success(
             f"🔗 Merged {len(compatible)} "
             f"files into one combined "
             f"dataset ({len(merged):,} rows)")
         return merged
-    return compatible[0]
+    elif (choice == "📁 Keep separate — "
+            "use first file only for now"):
+        st.info(
+            f"📁 Keeping files separate — "
+            f"using **{compatible[0]['name']}**"
+            f" only for this analysis. "
+            f"(Per-file separate analysis "
+            f"for all files is a planned "
+            f"future enhancement.)")
+        return compatible[0]["df"]
+    else:
+        st.warning(
+            "☝️ Please choose how to handle "
+            "these files above before "
+            "continuing.")
+        return None
 
 # Build the primary df for Marketing Dokku
 df = None
 if marketing_dfs:
-    df = try_merge(marketing_dfs)
+    df = try_merge(
+        marketing_dfs, "Customer/Marketing")
 elif loaded and not ops_dfs:
     # No marketing file and no ops file —
     # use first file anyway so preview still
@@ -206,7 +256,8 @@ elif loaded and not ops_dfs:
 # Dokku
 ops_df = None
 if ops_dfs:
-    ops_df = try_merge(ops_dfs)
+    ops_df = try_merge(
+        ops_dfs, "Operations/Quality")
 
 # Show combined preview if we have a df
 if df is not None:
@@ -527,7 +578,7 @@ if df is not None:
 
             if concern_ops:
                 # ── DATA GAP CHECK (Ops) ──
-                if ops_df is None:
+                if ops_df is None and not ops_dfs:
                     st.warning(
                         "🔬 **Data Gap Detected** "
                         "— you flagged Supply "
@@ -539,6 +590,14 @@ if df is not None:
                         "go get production, "
                         "machine, or process "
                         "data and upload it.")
+                elif ops_df is None and ops_dfs:
+                    st.warning(
+                        "☝️ Please choose how "
+                        "to handle your "
+                        "Operations/Quality "
+                        "files above (merge "
+                        "or keep separate) "
+                        "before continuing.")
                 else:
                     st.success(
                         "✅ Operations/Quality "
