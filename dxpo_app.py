@@ -12,14 +12,14 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jul 01, 2026-->dxpo_app (34) in Higashi-PC) version
+# Header Jul 01, 2026-->dxpo_app (35) in Higashi-PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(34)jul012026-11:47)")
+    "Process Optimization ver(35)jul012026-11:55)")
 st.markdown("---")
 
 # ── STEP 1: FILE UPLOAD ──
@@ -527,6 +527,23 @@ if df is not None:
                         concern_areas):
                     concern_areas.append(
                         label_str)
+            # Also auto-unlock Operations/
+            # Quality from symptom
+            if (c['category'] in [
+                    "Supply chain / Operations",
+                    "Product Quality Problems"]
+                    and not concern_ops
+                    and not concern_quality):
+                concern_ops = True
+                label_str = (
+                    "Supply chain / Operations"
+                    " (from concern: \"" +
+                    c['text'][:40] +
+                    "...\")")
+                if label_str not in (
+                        concern_areas):
+                    concern_areas.append(
+                        label_str)
 
         # Keep backward-compat keys so DOC
         # Summary and S-TEST still work
@@ -618,13 +635,13 @@ if df is not None:
                     "concern area(s)!!")
                 proceed_to_doc = True
 
-            if concern_ops:
+            if concern_ops or concern_quality:
                 # ── DATA GAP CHECK (Ops) ──
                 if ops_df is None and not ops_dfs:
                     st.warning(
                         "🔬 **Data Gap Detected** "
-                        "— you flagged Supply "
-                        "chain/Operations as a "
+                        "— you flagged an "
+                        "Operations/Quality "
                         "concern, but no "
                         "uploaded file was "
                         "detected as Operations"
@@ -651,7 +668,8 @@ if df is not None:
 
             if not proceed_to_doc and not (
                     concern_marketing or
-                    concern_ops):
+                    concern_ops or
+                    concern_quality):
                 st.info(
                     "🚧 This module is coming "
                     "soon — Marketing Dokku "
