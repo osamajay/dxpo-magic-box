@@ -12,14 +12,14 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jul 01, 2026-->dxpo_app (33) in Higashi-PC) version
+# Header Jul 01, 2026-->dxpo_app (34) in Higashi-PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(33)jul012026-00:41)")
+    "Process Optimization ver(34)jul012026-11:47)")
 st.markdown("---")
 
 # ── STEP 1: FILE UPLOAD ──
@@ -246,7 +246,7 @@ df = None
 if marketing_dfs:
     df = try_merge(
         marketing_dfs, "Customer/Marketing")
-elif loaded and not ops_dfs:
+elif loaded and not ops_dfs and not marketing_dfs:
     # No marketing file and no ops file —
     # use first file anyway so preview still
     # works; data-gap check will warn the user
@@ -259,10 +259,12 @@ if ops_dfs:
     ops_df = try_merge(
         ops_dfs, "Operations/Quality")
 
-# Show combined preview if we have a df
+# Show combined preview if we have a
+# marketing df
 if df is not None:
     st.markdown(
-        "**📊 Combined Dataset for Analysis**")
+        "**📊 Combined Dataset for Analysis "
+        "(Marketing)**")
     col1,col2,col3 = st.columns(3)
     with col1:
         st.metric("Rows",
@@ -276,11 +278,51 @@ if df is not None:
 
     with st.expander(
         "👀 Preview: Final Combined Dataset "
-        "(used for analysis)"):
+        "(used for Marketing analysis)"):
         st.dataframe(df.head(10),
             use_container_width=True)
 
     st.markdown("---")
+
+# Show combined preview if we have an
+# ops df (and no marketing df, to avoid
+# showing the same preview twice)
+if ops_df is not None and df is None:
+    st.markdown(
+        "**📊 Combined Dataset for Analysis "
+        "(Operations/Quality)**")
+    oc1,oc2,oc3 = st.columns(3)
+    with oc1:
+        st.metric("Rows",
+            f"{ops_df.shape[0]:,}")
+    with oc2:
+        st.metric("Columns",
+            ops_df.shape[1])
+    with oc3:
+        st.metric("Missing",
+            ops_df.isnull().sum().sum())
+
+    with st.expander(
+        "👀 Preview: Final Combined Dataset "
+        "(used for Operations/Quality "
+        "analysis)"):
+        st.dataframe(ops_df.head(10),
+            use_container_width=True)
+
+    st.markdown("---")
+
+# Step 0 onward should render whenever we
+# have EITHER a marketing df OR an ops df
+# ready to analyze — not just marketing.
+# When there's no marketing df, fall back
+# to using ops_df as the "primary" df so
+# downstream code (which historically only
+# checks `df`) still has something to work
+# with for things like the data preview /
+# DXPO DOC interview, which are concern-
+# agnostic.
+if df is None and ops_df is not None:
+    df = ops_df
 
 if df is not None:
     try:
