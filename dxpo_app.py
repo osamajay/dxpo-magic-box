@@ -12,14 +12,14 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jul 01, 2026-->dxpo_app (35) in Higashi-PC) version
+# Header Jul 03, 2026-->dxpo_app (36) in Higashi-PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(35)jul012026-11:55)")
+    "Process Optimization ver(36)jul032026-00:09)")
 st.markdown("---")
 
 # ── STEP 1: FILE UPLOAD ──
@@ -42,7 +42,7 @@ def detect_file_type(df):
         'spend','price','unit-price',
         'customer','status','channel',
         'payment']):
-        return "Customer / Marketing"
+        return "Customer & Marketing Strategies"
     if any(k in cols for k in [
         'defect','downtime','machine',
         'units-produced','maintenance',
@@ -52,18 +52,18 @@ def detect_file_type(df):
         'employee','headcount','salary',
         'attendance','performance',
         'department','hire-date']):
-        return "HR / Workforce"
+        return "HR / Workforce Efficiency"
     if any(k in cols for k in [
         'budget','profit','expense',
         'cost','invoice','ledger']):
-        return "Finance"
+        return "Finance & Cost Control"
     return "Unknown — please select below"
 
 MODULE_OPTIONS = [
-    "Customer / Marketing",
+    "Customer & Marketing Strategies",
     "Operations / Quality",
-    "HR / Workforce",
-    "Finance",
+    "HR / Workforce Efficiency",
+    "Finance & Cost Control",
     "Unknown — please select below"
 ]
 
@@ -159,7 +159,7 @@ if uploaded_files:
 # merge them into one combined df.
 marketing_dfs = [
     l for l in loaded
-    if l["assigned"] == "Customer / Marketing"]
+    if l["assigned"] == "Customer & Marketing Strategies"]
 ops_dfs = [
     l for l in loaded
     if l["assigned"] == "Operations / Quality"]
@@ -342,37 +342,37 @@ if df is not None:
         col1, col2 = st.columns(2)
         with col1:
             concern_hr = st.checkbox(
-                "👥 HR / Workforce efficiency")
+                "👥 HR / Workforce Efficiency")
             concern_kpi = st.checkbox(
-                "📊 Not using data to drive KPIs")
+                "📊 Data & KPI Visibility")
             concern_quality = st.checkbox(
-                "🏭 Product Quality Problems")
+                "🏭 Quality & Process Efficiency")
         with col2:
             concern_marketing = st.checkbox(
-                "🛒 Customer / Marketing")
+                "🛒 Customer & Marketing Strategies")
             concern_ops = st.checkbox(
-                "🚚 Supply chain / Operations")
+                "🚚 Supply Chain & Operations")
             concern_finance = st.checkbox(
-                "💰 Finance")
+                "💰 Finance & Cost Control")
 
         concern_areas = []
         if concern_hr:
             concern_areas.append(
-                "HR / Workforce efficiency")
+                "HR / Workforce Efficiency")
         if concern_kpi:
             concern_areas.append(
-                "Not using data to drive KPIs")
+                "Data & KPI Visibility")
         if concern_quality:
             concern_areas.append(
-                "Product Quality Problems")
+                "Quality & Process Efficiency")
         if concern_marketing:
             concern_areas.append(
-                "Customer / Marketing")
+                "Customer & Marketing Strategies")
         if concern_ops:
             concern_areas.append(
-                "Supply chain / Operations")
+                "Supply Chain & Operations")
         if concern_finance:
-            concern_areas.append("Finance")
+            concern_areas.append("Finance & Cost Control")
 
         # ── OPEN SYMPTOMS (multi-concern) ──
         st.markdown(
@@ -390,11 +390,11 @@ if df is not None:
 
         MAX_CONCERNS = 5
         cat_list = (
-            "HR / Workforce efficiency, "
-            "Not using data to drive KPIs, "
-            "Product Quality Problems, "
-            "Customer / Marketing, "
-            "Supply chain / Operations, "
+            "HR / Workforce Efficiency, "
+            "Data & KPI Visibility, "
+            "Quality & Process Efficiency, "
+            "Customer & Marketing Strategies, "
+            "Supply Chain & Operations, "
             "Finance, or NEW (if none fit)")
 
         # Cached concerns dict: key = index,
@@ -515,11 +515,11 @@ if df is not None:
         # across reruns from any concern slot
         for c in all_concerns:
             if (c['category'] ==
-                    "Customer / Marketing"
+                    "Customer & Marketing Strategies"
                     and not concern_marketing):
                 concern_marketing = True
                 label_str = (
-                    "Customer / Marketing "
+                    "Customer & Marketing Strategies "
                     "(from concern: \"" +
                     c['text'][:40] +
                     "...\")")
@@ -530,13 +530,13 @@ if df is not None:
             # Also auto-unlock Operations/
             # Quality from symptom
             if (c['category'] in [
-                    "Supply chain / Operations",
-                    "Product Quality Problems"]
+                    "Supply Chain & Operations",
+                    "Quality & Process Efficiency"]
                     and not concern_ops
                     and not concern_quality):
                 concern_ops = True
                 label_str = (
-                    "Supply chain / Operations"
+                    "Supply Chain & Operations"
                     " (from concern: \"" +
                     c['text'][:40] +
                     "...\")")
@@ -718,7 +718,7 @@ if df is not None:
                 dept_opts = [
                     "📊 Sales & Marketing",
                     "⚙️ Operations",
-                    "💹 Finance",
+                    "💹 Finance & Cost Control",
                     "🤝 Customer Service",
                     "🏢 All equally"]
 
