@@ -12,18 +12,116 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jul 03, 2026-->dxpo_app (36) in Higashi-PC) version
+# Header Jul 03, 2026-->dxpo_app (37) in Higashi-PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(36)jul032026-00:09)")
+    "Process Optimization ver(37)jul032026-10:08)")
 st.markdown("---")
 
-# ── STEP 1: FILE UPLOAD ──
-st.subheader("📂 Step 1 — Upload Your Data")
+# ══════════════════════════════════════════
+# STEP 0A — GENERAL PRE-VISIT QUESTIONS
+# (answered BEFORE uploading any data,
+#  like the Ningendokku mailed questionnaire)
+# ══════════════════════════════════════════
+st.subheader("📝 Step 0A — Who Are You?")
+st.caption(
+    "Tell us about your company before "
+    "uploading any data — like the "
+    "Ningendokku questionnaire you fill "
+    "in at home before visiting the clinic!!")
+
+col_0a1, col_0a2 = st.columns(2)
+with col_0a1:
+    company_type = st.radio(
+        "What kind of company are you?",
+        ["🏭 Manufacturing",
+         "🛒 Service / Retail / E-commerce",
+         "🔄 Both Manufacturing & Service",
+         "❓ Not sure yet"],
+        key="company_type_0a")
+
+with col_0a2:
+    industry_0a = st.radio(
+        "Your industry?",
+        ["🛒 Retail / E-commerce",
+         "🏭 Manufacturing",
+         "💰 Financial Services",
+         "🏥 Healthcare",
+         "🚚 Logistics / Supply Chain",
+         "🔧 Other"],
+        key="industry_0a")
+
+st.markdown("---")
+
+# ══════════════════════════════════════════
+# STEP 0B — CONCERN AREA SELECTION
+# (still before upload — tells us what
+#  data to ask for in Step 0C)
+# ══════════════════════════════════════════
+st.subheader("📋 Step 0B — What's Bothering You?")
+st.caption(
+    "Select your concern areas — this tells "
+    "DXPO MB what kind of data to expect "
+    "and which Dokku module(s) to activate!!")
+
+st.markdown(
+    "Select the area(s) you're most "
+    "concerned about:")
+
+col_0b1, col_0b2 = st.columns(2)
+with col_0b1:
+    concern_hr_pre = st.checkbox(
+        "👥 HR / Workforce Efficiency",
+        key="pre_hr")
+    concern_kpi_pre = st.checkbox(
+        "📊 Data & KPI Visibility",
+        key="pre_kpi")
+    concern_quality_pre = st.checkbox(
+        "🏭 Quality & Process Efficiency",
+        key="pre_quality")
+with col_0b2:
+    concern_marketing_pre = st.checkbox(
+        "🛒 Customer & Marketing Strategies",
+        key="pre_marketing")
+    concern_ops_pre = st.checkbox(
+        "🚚 Supply Chain & Operations",
+        key="pre_ops")
+    concern_finance_pre = st.checkbox(
+        "💰 Finance & Cost Control",
+        key="pre_finance")
+
+# Guidance based on selections
+if concern_marketing_pre and not (
+        concern_quality_pre or concern_ops_pre):
+    st.info(
+        "📂 For Customer & Marketing analysis, "
+        "please upload customer transaction "
+        "data (with columns like Customer-ID, "
+        "Amount, Status, Channel).")
+elif (concern_quality_pre or
+        concern_ops_pre) and not (
+        concern_marketing_pre):
+    st.info(
+        "📂 For Quality & Operations analysis, "
+        "please upload production/machine data "
+        "(with columns like Machine-ID, "
+        "Defect-Rate, Downtime-Mins).")
+elif concern_marketing_pre and (
+        concern_quality_pre or concern_ops_pre):
+    st.info(
+        "📂 You selected both Marketing and "
+        "Operations concerns — please upload "
+        "both types of data files (up to 3 "
+        "files supported)!!")
+
+st.markdown("---")
+
+# ── STEP 0C: UPLOAD YOUR DATA ──
+st.subheader("📂 Step 0C — Upload Your Data")
 st.caption(
     "Upload up to 3 files (Excel or CSV). "
     "DXPO MB will auto-detect what each file "
@@ -329,31 +427,37 @@ if df is not None:
 
         # ── STEP 0: PRE-VISIT QUESTIONNAIRE ──
         st.subheader(
-            "📝 Step 0 — Pre-Visit Questionnaire")
+            "📝 Step 0 — Confirm Your Concerns")
         st.caption(
-            "Like the Ningendokku pre-visit form — "
-            "tell us where it hurts before we run "
-            "any tests!!")
+            "Your selections from Step 0B are "
+            "shown below — adjust if needed "
+            "now that your data is uploaded!!")
 
         st.markdown(
-            "Select the area(s) you're most "
+            "Confirm the area(s) you're most "
             "concerned about:")
 
         col1, col2 = st.columns(2)
         with col1:
             concern_hr = st.checkbox(
-                "👥 HR / Workforce Efficiency")
+                "👥 HR / Workforce Efficiency",
+                value=concern_hr_pre)
             concern_kpi = st.checkbox(
-                "📊 Data & KPI Visibility")
+                "📊 Data & KPI Visibility",
+                value=concern_kpi_pre)
             concern_quality = st.checkbox(
-                "🏭 Quality & Process Efficiency")
+                "🏭 Quality & Process Efficiency",
+                value=concern_quality_pre)
         with col2:
             concern_marketing = st.checkbox(
-                "🛒 Customer & Marketing Strategies")
+                "🛒 Customer & Marketing Strategies",
+                value=concern_marketing_pre)
             concern_ops = st.checkbox(
-                "🚚 Supply Chain & Operations")
+                "🚚 Supply Chain & Operations",
+                value=concern_ops_pre)
             concern_finance = st.checkbox(
-                "💰 Finance & Cost Control")
+                "💰 Finance & Cost Control",
+                value=concern_finance_pre)
 
         concern_areas = []
         if concern_hr:
@@ -689,6 +793,7 @@ if df is not None:
             col1, col2 = st.columns(2)
 
             with col1:
+                # Q1 — pre-filled from Step 0A
                 industry = st.radio(
                     "Q1: Your industry?",
                     ["🛒 Retail/E-commerce",
@@ -696,15 +801,76 @@ if df is not None:
                      "💰 Financial Services",
                      "🏥 Healthcare",
                      "🚚 Logistics/Supply Chain",
-                     "🔧 Other"])
+                     "🔧 Other"],
+                    index=["🛒 Retail/E-commerce",
+                           "🏭 Manufacturing",
+                           "💰 Financial Services",
+                           "🏥 Healthcare",
+                           "🚚 Logistics/Supply Chain",
+                           "🔧 Other"].index(
+                        "🏭 Manufacturing"
+                        if "Manufacturing"
+                        in industry_0a else
+                        "🛒 Retail/E-commerce"
+                        if "Retail" in
+                        industry_0a else
+                        "💰 Financial Services"
+                        if "Financial"
+                        in industry_0a else
+                        "🏥 Healthcare"
+                        if "Healthcare"
+                        in industry_0a else
+                        "🚚 Logistics/Supply Chain"
+                        if "Logistics"
+                        in industry_0a else
+                        "🔧 Other"))
 
-                concern_opts = [
-                    "📉 Revenue declining",
-                    "💸 Costs too high",
-                    "👥 Losing customers/churn",
-                    "⏱️ Processes too slow",
-                    "🔍 Cannot identify best customers",
-                    "📢 Marketing not effective"]
+                # Q2 — adaptive based on
+                # concern selections
+                is_ops_concern = (
+                    concern_quality or
+                    concern_ops)
+                is_mkt_concern = (
+                    concern_marketing)
+
+                if is_ops_concern and not (
+                        is_mkt_concern):
+                    concern_opts = [
+                        "⚠️ Defect rate too high",
+                        "⏱️ Machine downtime "
+                        "excessive",
+                        "🔧 Process bottlenecks",
+                        "📋 Quality control gaps",
+                        "🚚 Supply chain delays",
+                        "🔩 Maintenance issues"]
+                elif is_mkt_concern and not (
+                        is_ops_concern):
+                    concern_opts = [
+                        "📉 Revenue declining",
+                        "💸 Costs too high",
+                        "👥 Losing customers/"
+                        "churn",
+                        "⏱️ Processes too slow",
+                        "🔍 Cannot identify "
+                        "best customers",
+                        "📢 Marketing not "
+                        "effective"]
+                else:
+                    # Both or neither —
+                    # show combined list
+                    concern_opts = [
+                        "📉 Revenue declining",
+                        "⚠️ Defect rate too high",
+                        "💸 Costs too high",
+                        "👥 Losing customers/"
+                        "churn",
+                        "⏱️ Machine downtime "
+                        "excessive",
+                        "🔧 Process bottlenecks",
+                        "🔍 Cannot identify "
+                        "best customers",
+                        "📢 Marketing not "
+                        "effective"]
 
                 concern_primary = st.selectbox(
                     "Q2: PRIMARY concern:",
@@ -715,12 +881,37 @@ if df is not None:
                     ["None"] + concern_opts)
 
             with col2:
-                dept_opts = [
-                    "📊 Sales & Marketing",
-                    "⚙️ Operations",
-                    "💹 Finance & Cost Control",
-                    "🤝 Customer Service",
-                    "🏢 All equally"]
+                # Q3 — adaptive based on
+                # concern selections
+                if is_ops_concern and not (
+                        is_mkt_concern):
+                    dept_opts = [
+                        "🏭 Production / "
+                        "Manufacturing",
+                        "🔍 Quality Control",
+                        "🔧 Maintenance",
+                        "🚚 Supply Chain",
+                        "🏢 All equally"]
+                elif is_mkt_concern and not (
+                        is_ops_concern):
+                    dept_opts = [
+                        "📊 Sales & Marketing",
+                        "⚙️ Operations",
+                        "💹 Finance & Cost "
+                        "Control",
+                        "🤝 Customer Service",
+                        "🏢 All equally"]
+                else:
+                    dept_opts = [
+                        "📊 Sales & Marketing",
+                        "🏭 Production / "
+                        "Manufacturing",
+                        "🔍 Quality Control",
+                        "⚙️ Operations",
+                        "💹 Finance & Cost "
+                        "Control",
+                        "🤝 Customer Service",
+                        "🏢 All equally"]
 
                 dept_primary = st.selectbox(
                     "Q3: PRIMARY department:",
