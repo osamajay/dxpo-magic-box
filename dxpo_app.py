@@ -12,14 +12,14 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jul 03, 2026-->dxpo_app (37) in Higashi-PC) version
+# Header Jul 03, 2026-->dxpo_app (38) in Higashi-PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(37)jul032026-10:08)")
+    "Process Optimization ver(38)jul032026-22:20)")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -499,7 +499,49 @@ if df is not None:
             "Quality & Process Efficiency, "
             "Customer & Marketing Strategies, "
             "Supply Chain & Operations, "
-            "Finance, or NEW (if none fit)")
+            "Finance & Cost Control, "
+            "or NEW (if none fit)")
+
+        # Category definitions for the
+        # classifier — critical for avoiding
+        # misclassification between similar
+        # categories (e.g. machine downtime
+        # is Quality & Process Efficiency,
+        # NOT Supply Chain & Operations)
+        cat_definitions = (
+            "\n\nCategory definitions "
+            "(use these to classify):\n"
+            "- HR / Workforce Efficiency: "
+            "staffing, headcount, employee "
+            "productivity, absenteeism, "
+            "training, workforce planning\n"
+            "- Data & KPI Visibility: "
+            "lack of dashboards, reports "
+            "take too long, no real-time "
+            "data, KPIs not tracked\n"
+            "- Quality & Process Efficiency:"
+            " defect rates, machine downtime,"
+            " equipment failures, maintenance"
+            " issues, production bottlenecks,"
+            " process inefficiency, scrap "
+            "rates, rework\n"
+            "- Customer & Marketing "
+            "Strategies: customer churn, "
+            "revenue declining, marketing "
+            "effectiveness, sales performance"
+            ", customer segmentation, "
+            "pricing strategy\n"
+            "- Supply Chain & Operations: "
+            "supplier delays, inventory "
+            "management, logistics, delivery"
+            " performance, procurement, "
+            "warehousing\n"
+            "- Finance & Cost Control: "
+            "budget overruns, cost reduction"
+            ", profitability, cash flow, "
+            "financial reporting\n"
+            "- NEW: if the concern does not "
+            "fit any category above")
 
         # Cached concerns dict: key = index,
         # value = {text, category}
@@ -526,9 +568,11 @@ if df is not None:
                     "EXACTLY ONE of these "
                     "categories: " +
                     cat_list +
+                    cat_definitions +
                     "\n\nReply with ONLY "
-                    "the category name, "
-                    "nothing else.")
+                    "the category name "
+                    "exactly as written "
+                    "above, nothing else.")
                 msg = client.messages.create(
                     model="claude-opus-4-5",
                     max_tokens=100,
@@ -1029,12 +1073,29 @@ if df is not None:
                          "Large (over 1000)"])
 
                     opt_digital = st.selectbox(
-                        "OPT-Q3: Current digital tools?",
+                        "OPT-Q3: Current "
+                        "digital tools?",
                         ["Not answered",
-                         "None — paper based",
-                         "Basic (Excel only)",
-                         "Some (CRM/ERP)",
-                         "Advanced (AI/Analytics)"])
+                         "None — paper / "
+                         "fax based",
+                         "Basic spreadsheets"
+                         " (Excel / "
+                         "Google Sheets)",
+                         "ERP system (SAP/"
+                         "Oracle/Kintone/"
+                         "Freee/弥生)",
+                         "CRM system "
+                         "(Salesforce/"
+                         "HubSpot/Zoho)",
+                         "MES / SCADA "
+                         "(factory systems)",
+                         "BI / Analytics "
+                         "(Tableau/Power BI"
+                         "/Looker)",
+                         "AI / Advanced "
+                         "Analytics",
+                         "Mixed — several "
+                         "of the above"])
 
                 with col2:
                     opt_budget = st.selectbox(
@@ -2354,6 +2415,148 @@ if df is not None:
                             st.write(
                                 "**Finding:** "
                                 + p['finding'])
+
+                            # Statistical
+                            # threshold notes
+                            # per test
+                            st.markdown(
+                                "**📊 "
+                                "Statistical "
+                                "Note:**")
+                            if p['test'] == (
+                                "Defect Rate "
+                                "by Machine"):
+                                st.write(
+                                    "Threshold:"
+                                    " >10% avg "
+                                    "defect rate"
+                                    " = 🔴 RED · "
+                                    ">5% = 🟡 "
+                                    "YELLOW · "
+                                    "≤5% = 🟢 "
+                                    "GREEN")
+                                if (machine_col
+                                        and
+                                        defect_col):
+                                    by_m = (
+                                        odf
+                                        .groupby(
+                                        machine_col
+                                        )[defect_col]
+                                        .mean()
+                                        .sort_values(
+                                        ascending=
+                                        False))
+                                    st.write(
+                                        "Your "
+                                        "rates: " +
+                                        ", ".join(
+                                        f"{m}: "
+                                        f"{r:.1f}%"
+                                        for m,r
+                                        in by_m
+                                        .items()))
+                            elif p['test'] == (
+                                "Downtime by "
+                                "Shift"):
+                                st.write(
+                                    "Threshold:"
+                                    " >60 min "
+                                    "avg = 🔴 "
+                                    "RED · >30 "
+                                    "min = 🟡 "
+                                    "YELLOW · "
+                                    "≤30 min = "
+                                    "🟢 GREEN")
+                                if (shift_col_name
+                                        and
+                                        downtime_col):
+                                    by_s = (
+                                        odf
+                                        .groupby(
+                                        shift_col_name
+                                        )[downtime_col]
+                                        .mean()
+                                        .sort_values(
+                                        ascending=
+                                        False))
+                                    st.write(
+                                        "Your "
+                                        "rates: " +
+                                        ", ".join(
+                                        f"{s}: "
+                                        f"{d:.0f}"
+                                        " min"
+                                        for s,d
+                                        in by_s
+                                        .items()))
+                            elif p['test'] == (
+                                "Temperature "
+                                "/ Defect "
+                                "Correlation"):
+                                st.write(
+                                    "Threshold:"
+                                    " correlation"
+                                    " >0.6 = 🔴 "
+                                    "RED · >0.3"
+                                    " = 🟡 "
+                                    "YELLOW · "
+                                    "≤0.3 = 🟢 "
+                                    "GREEN")
+                                if (temp_col
+                                        and
+                                        defect_col):
+                                    corr_val = (
+                                        odf[[
+                                        temp_col,
+                                        defect_col
+                                        ]].corr()
+                                        .iloc[0,1])
+                                    corr_str = (
+                                        f"{corr_val:.2f}")
+                                    st.write(
+                                        "Your "
+                                        "correlation"
+                                        ": " +
+                                        corr_str)
+                            elif p['test'] == (
+                                "Maintenance "
+                                "Flag "
+                                "Frequency"):
+                                st.write(
+                                    "Threshold:"
+                                    " >20% "
+                                    "flagged = "
+                                    "🔴 RED · "
+                                    ">10% = 🟡 "
+                                    "YELLOW · "
+                                    "≤10% = 🟢 "
+                                    "GREEN")
+                                if maint_col:
+                                    m_pct = (
+                                        (odf[
+                                        maint_col]
+                                        == 'YES')
+                                        .sum() /
+                                        on * 100)
+                                    m_pct_str = (
+                                        f"{m_pct:.1f}%")
+                                    st.write(
+                                        "Your "
+                                        "rate: " +
+                                        m_pct_str)
+                            elif p['test'] == (
+                                "Production "
+                                "Volume "
+                                "Overview"):
+                                st.write(
+                                    "Informational"
+                                    " — no fixed "
+                                    "threshold. "
+                                    "Baseline "
+                                    "context for "
+                                    "capacity "
+                                    "planning.")
 
                     st.markdown("---")
                     st.markdown(
