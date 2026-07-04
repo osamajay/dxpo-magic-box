@@ -12,14 +12,14 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jul 03, 2026-->dxpo_app (38) in Higashi-PC) version
+# Header Jul 04, 2026-->dxpo_app (39) in Higashi-PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(38)jul032026-22:20)")
+    "Process Optimization ver(39)jul042026-10:54)")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -2601,10 +2601,297 @@ if df is not None:
                             use_container_width=
                             True)
 
+                    st.markdown("---")
+
+                    # ── OPS STEP 4: IMPACT ──
+                    st.subheader(
+                        "🎯 Step 4 — "
+                        "DXPO Impact Evaluation")
+                    st.caption(
+                        "Figure 4 · "
+                        "Dr. Jay Rajasekera · "
+                        "APO Framework · Springer")
+                    st.info(
+                        "Rate each pain point "
+                        "found in your "
+                        "Operations/Quality "
+                        "data. Your DX team "
+                        "decides — not the AI!!")
+
+                    ops_impact_scores = []
+                    for oi, op in enumerate(
+                            ops_pain_points, 1):
+                        st.write(
+                            f"**{op['flag']} "
+                            f"{op['test']}**")
+                        ocol1, ocol2 = (
+                            st.columns(2))
+                        with ocol1:
+                            oa = st.slider(
+                                "A — Customer "
+                                "Value",
+                                1, 10, 7,
+                                key=
+                                f"ops_a_{oi}")
+                        with ocol2:
+                            ob = st.slider(
+                                "B — "
+                                "Implementation"
+                                " Potential",
+                                1, 10, 5,
+                                key=
+                                f"ops_b_{oi}")
+                        ops_impact_scores.append(
+                            {
+                            "pain_point":
+                                op['test'],
+                            "finding":
+                                op['finding'],
+                            "flag":
+                                op['flag'],
+                            "A": oa,
+                            "B": ob,
+                            "impact": oa*ob
+                            })
+                        st.write(
+                            "Impact = "
+                            f"{oa} × {ob} = "
+                            f"**{oa*ob}**")
+                        st.markdown("---")
+
+                    ops_impact_scores.sort(
+                        key=lambda x:
+                        x['impact'],
+                        reverse=True)
+                    for oi, op in enumerate(
+                            ops_impact_scores,
+                            1):
+                        op['rank'] = oi
+
+                    # Impact Table
+                    o_processes = [
+                        p['pain_point']
+                        for p in
+                        ops_impact_scores]
+                    o_a_vals = [
+                        p['A'] for p in
+                        ops_impact_scores]
+                    o_b_vals = [
+                        p['B'] for p in
+                        ops_impact_scores]
+                    o_impacts = [
+                        p['impact'] for p in
+                        ops_impact_scores]
+                    o_ranks = [
+                        f"#{p['rank']}"
+                        for p in
+                        ops_impact_scores]
+                    o_colors = [
+                        '#2ECC71' if i>=70
+                        else '#F39C12'
+                        if i>=50 else
+                        '#E74C3C'
+                        for i in o_impacts]
+
+                    ofig2 = go.Figure(
+                        data=[go.Table(
+                        columnwidth=[
+                            260,70,70,90,70],
+                        header=dict(
+                            values=[
+                            '<b>Process</b>',
+                            '<b>A</b>',
+                            '<b>B</b>',
+                            '<b>Impact</b>',
+                            '<b>Rank</b>'],
+                            fill_color=
+                            '#1B3A6B',
+                            font=dict(
+                                color='white',
+                                size=12),
+                            align='center',
+                            height=45),
+                        cells=dict(
+                            values=[
+                            o_processes,
+                            o_a_vals,
+                            o_b_vals,
+                            o_impacts,
+                            o_ranks],
+                            fill_color=[
+                            ['#F8F9FA']*
+                            len(o_processes),
+                            ['#EBF5FB']*
+                            len(o_processes),
+                            ['#EBF5FB']*
+                            len(o_processes),
+                            o_colors,
+                            ['#F8F9FA']*
+                            len(o_processes)],
+                            font=dict(
+                                color=[
+                                ['#1B3A6B']*
+                                len(
+                                o_processes),
+                                ['#1B3A6B']*
+                                len(
+                                o_processes),
+                                ['#1B3A6B']*
+                                len(
+                                o_processes),
+                                ['white']*
+                                len(
+                                o_processes),
+                                ['#1B3A6B']*
+                                len(
+                                o_processes)],
+                                size=12),
+                            align='center',
+                            height=38))])
+
+                    ofig2.update_layout(
+                        title=dict(
+                            text=
+                            '🎯 DXPO Impact '
+                            'Table · '
+                            'Dr. Jay '
+                            'Rajasekera',
+                            x=0.5,
+                            font=dict(
+                                size=14,
+                                color=
+                                '#1B3A6B')),
+                        height=300,
+                        margin=dict(
+                            l=10,r=10,
+                            t=60,b=10))
+
+                    st.plotly_chart(
+                        ofig2,
+                        use_container_width=
+                        True)
+
+                    ofig2.write_html(
+                        'ops_impact.html')
+                    with open(
+                        'ops_impact.html',
+                        'rb') as f_html:
+                        st.download_button(
+                            "📥 Download "
+                            "Impact Table",
+                            f_html,
+                            "DXPO_Ops_"
+                            "ImpactTable"
+                            ".html",
+                            use_container_width
+                            =True)
+
+                    st.markdown("---")
+
+                    # ── OPS STEP 5: REPORT ──
+                    st.subheader(
+                        "🪄 Step 5 — "
+                        "DXPO Report")
+                    st.caption(
+                        "Operations/Quality "
+                        "Edition")
+
+                    ops_summary = (
+                        "Industry: " +
+                        industry + "\n"
+                        "Company type: " +
+                        company_type + "\n"
+                        "Primary concern: " +
+                        concern_primary + "\n"
+                        "Pain points found: "
+                        + str(len(
+                        ops_pain_points))
+                        + "\n")
+                    for op in (
+                            ops_impact_scores):
+                        ops_summary += (
+                            "#" +
+                            str(op['rank']) +
+                            " " +
+                            op['pain_point'] +
+                            ": Impact=" +
+                            str(op['impact'])
+                            + "/100\n")
+
+                    try:
+                        api_key = (
+                            os.environ.get(
+                            "ANTHROPIC_"
+                            "API_KEY", ""))
+                        client = (
+                            anthropic
+                            .Anthropic(
+                            api_key=api_key))
+                        ops_msg = (
+                            client.messages
+                            .create(
+                            model=
+                            "claude-opus-4-5",
+                            max_tokens=1500,
+                            messages=[{
+                                "role":
+                                "user",
+                                "content":
+                                "You are DXPO"
+                                " AI Magic Box"
+                                " by Dr. Jay "
+                                "Rajasekera, "
+                                "Tokyo "
+                                "International"
+                                " University."
+                                "\n\nGenerate "
+                                "a professional"
+                                " DXPO report "
+                                "for an "
+                                "Operations/"
+                                "Quality DX "
+                                "diagnostic:\n"
+                                + ops_summary
+                                + "\n\nInclude:"
+                                "\n1. EXECUTIVE"
+                                " SUMMARY"
+                                "\n2. TOP "
+                                "OPERATIONAL "
+                                "PAIN POINTS"
+                                "\n3. RECOMMENDED"
+                                " DX APPROACH"
+                                "\n4. QUICK WINS"
+                                " (30 days)"
+                                "\n5. STRATEGIC"
+                                " ROADMAP "
+                                "(6 months)"}
+                            ]))
+                        ops_report = (
+                            ops_msg
+                            .content[0]
+                            .text)
+                    except Exception as e:
+                        ops_report = (
+                            "Error generating"
+                            " report: " +
+                            str(e))
+
+                    st.markdown(ops_report)
+                    st.download_button(
+                        "📥 Download "
+                        "DXPO Operations "
+                        "Report",
+                        ops_report,
+                        "DXPO_Ops_"
+                        "Report.txt",
+                        use_container_width=
+                        True)
+
                     st.success(
                         "✅ Operations/"
                         "Quality analysis "
                         "complete!!")
+                    st.balloons()
 
             # End of Operations Dokku block
 
