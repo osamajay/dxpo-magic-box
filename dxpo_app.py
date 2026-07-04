@@ -12,14 +12,14 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jul 04, 2026-->dxpo_app (39) in Higashi-PC) version
+# Header Jul 04, 2026-->dxpo_app (40) in Higashi-PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(39)jul042026-10:54)")
+    "Process Optimization ver(40)jul042026-23:28)")
 st.markdown("---")
 
 # ══════════════════════════════════════════
