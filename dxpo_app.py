@@ -2394,6 +2394,23 @@ if df is not None:
                         "capacity!!"
                     }
 
+                    ops_test_labels = {
+                        "Defect Rate by "
+                        "Machine": "O-TEST 1",
+                        "Downtime by "
+                        "Shift": "O-TEST 2",
+                        "Temperature / "
+                        "Defect "
+                        "Correlation":
+                        "O-TEST 3",
+                        "Maintenance Flag "
+                        "Frequency":
+                        "O-TEST 4",
+                        "Production Volume "
+                        "Overview":
+                        "O-TEST 5"
+                    }
+
                     for p in ops_pain_points:
                         icon = (
                             "🔴" if 'RED' in
@@ -2401,24 +2418,53 @@ if df is not None:
                             "🟡" if 'YELLOW'
                             in p['flag'] else
                             "🟢")
+                        label = (
+                            ops_test_labels
+                            .get(p['test'],
+                            "O-TEST"))
+                        urgency_ops = (
+                            "🚨 Immediate "
+                            "attention needed"
+                            if 'RED' in
+                            p['flag'] else
+                            "⚠️ Monitor "
+                            "closely"
+                            if 'YELLOW' in
+                            p['flag'] else
+                            "✅ Healthy — "
+                            "maintain "
+                            "current practice")
+
                         with st.expander(
                             f"{icon} "
+                            f"{label}: "
                             f"{p['test']} — "
-                            f"{p['flag']}"):
-                            st.write(
-                                "**Why "
-                                "Tested:** " +
-                                why_ops.get(
-                                p['test'],
-                                "Standard "
-                                "test."))
-                            st.write(
-                                "**Finding:** "
-                                + p['finding'])
+                            f"{p['flag']}",
+                            expanded=True):
 
-                            # Statistical
-                            # threshold notes
-                            # per test
+                            ecol1, ecol2 = (
+                                st.columns(2))
+                            with ecol1:
+                                st.markdown(
+                                    "**📋 "
+                                    "Finding:**")
+                                st.write(
+                                    p['finding'])
+                                st.markdown(
+                                    "**🎯 "
+                                    "Urgency:**")
+                                st.write(
+                                    urgency_ops)
+                            with ecol2:
+                                st.markdown(
+                                    "**❓ Why "
+                                    "Tested:**")
+                                st.write(
+                                    why_ops.get(
+                                    p['test'],
+                                    "Standard "
+                                    "test."))
+
                             st.markdown(
                                 "**📊 "
                                 "Statistical "
