@@ -12,48 +12,120 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jul 04, 2026-->dxpo_app (40) in Higashi-PC) version
+# Header Jul 07, 2026-->dxpo_app (41) in Higashi-PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(40)jul042026-23:28)")
+    "Process Optimization ver(41) July 07, 2026-23:14)")
 st.markdown("---")
 
 # ══════════════════════════════════════════
 # STEP 0A — GENERAL PRE-VISIT QUESTIONS
 # (answered BEFORE uploading any data,
-#  like the Ningendokku mailed questionnaire)
+#  completed before submitting any data)
 # ══════════════════════════════════════════
-st.subheader("📝 Step 0A — Who Are You?")
+st.subheader("📝 Step 0A — Your Company Business Sector")
 st.caption(
-    "Tell us about your company before "
-    "uploading any data — like the "
-    "Ningendokku questionnaire you fill "
-    "in at home before visiting the clinic!!")
+    "Tell us about your company's business "
+    "sector — this shapes your entire "
+    "DX diagnostic profile!!")
+
+# Primary Sector → Sub-sector taxonomy
+sector_taxonomy = {
+    "🏭 Manufacturing": [
+        "Automobile / Automotive",
+        "Aerospace & Defense",
+        "Consumer Electronics",
+        "Pharmaceuticals & Life Sciences",
+        "Food & Beverage Processing",
+        "Chemicals & Materials",
+        "Industrial Machinery",
+        "Textiles & Apparel",
+        "Other Manufacturing"],
+    "🛒 Trading / Commerce": [
+        "E-Commerce",
+        "Traditional Retail (Brick-and-Mortar)",
+        "Wholesale & Distribution",
+        "Import / Export",
+        "Other Trading / Commerce"],
+    "🏢 Services": [
+        "Healthcare & Medical",
+        "Hospitality & Tourism",
+        "Education & Training",
+        "Professional Services (Legal / Consulting)",
+        "Media & Entertainment",
+        "Real Estate",
+        "Other Services"],
+    "💻 Technology (ICT)": [
+        "Software-as-a-Service (SaaS)",
+        "Cybersecurity",
+        "Cloud Computing & Infrastructure",
+        "Telecommunications",
+        "AI & Data Analytics",
+        "Other Technology"],
+    "💰 Finance & Insurance": [
+        "Banking (Retail & Investment)",
+        "Fintech (Financial Technology)",
+        "Insurance",
+        "Asset Management / Investing",
+        "Other Finance & Insurance"],
+    "⚡ Energy & Utilities": [
+        "Oil & Gas",
+        "Renewable Energy",
+        "Electric Power & Utilities",
+        "Water & Waste Management",
+        "Other Energy & Utilities"],
+    "🌾 Agriculture & Food": [
+        "Agribusiness & Farming",
+        "Food Processing & Distribution",
+        "Fisheries & Aquaculture",
+        "Other Agriculture & Food"],
+    "🚚 Logistics & Supply Chain": [
+        "Freight & Transportation",
+        "Warehousing & 3PL",
+        "Port & Airport Operations",
+        "Other Logistics"],
+}
 
 col_0a1, col_0a2 = st.columns(2)
 with col_0a1:
-    company_type = st.radio(
-        "What kind of company are you?",
-        ["🏭 Manufacturing",
-         "🛒 Service / Retail / E-commerce",
-         "🔄 Both Manufacturing & Service",
-         "❓ Not sure yet"],
-        key="company_type_0a")
+    primary_sector = st.selectbox(
+        "Primary Sector:",
+        list(sector_taxonomy.keys()),
+        key="primary_sector_0a")
 
 with col_0a2:
-    industry_0a = st.radio(
-        "Your industry?",
-        ["🛒 Retail / E-commerce",
-         "🏭 Manufacturing",
-         "💰 Financial Services",
-         "🏥 Healthcare",
-         "🚚 Logistics / Supply Chain",
-         "🔧 Other"],
-        key="industry_0a")
+    sub_sector = st.selectbox(
+        "Sub-sector:",
+        sector_taxonomy[primary_sector],
+        key="sub_sector_0a")
+
+# Keep industry_0a for backward compatibility
+# with downstream Q1 pre-fill logic
+industry_0a = primary_sector
+
+st.success(
+    f"✅ Sector confirmed: "
+    f"**{primary_sector}** → "
+    f"**{sub_sector}**")
+
+# Derive company_type for downstream use
+# (Step 5 report context)
+if "Manufacturing" in primary_sector:
+    company_type = "Manufacturing"
+elif any(s in primary_sector for s in [
+        "Trading", "Services", "Finance",
+        "Technology", "Logistics"]):
+    company_type = "Service / Commerce"
+elif "Energy" in primary_sector:
+    company_type = "Energy & Utilities"
+elif "Agriculture" in primary_sector:
+    company_type = "Agriculture & Food"
+else:
+    company_type = primary_sector
 
 st.markdown("---")
 
@@ -62,11 +134,11 @@ st.markdown("---")
 # (still before upload — tells us what
 #  data to ask for in Step 0C)
 # ══════════════════════════════════════════
-st.subheader("📋 Step 0B — What's Bothering You?")
+st.subheader("📋 Step 0B — Your Business Challenges")
 st.caption(
-    "Select your concern areas — this tells "
-    "DXPO MB what kind of data to expect "
-    "and which Dokku module(s) to activate!!")
+    "Select your key business challenges — "
+    "this determines which DX diagnostic "
+    "modules activate for your company!!")
 
 st.markdown(
     "Select the area(s) you're most "
@@ -75,30 +147,30 @@ st.markdown(
 col_0b1, col_0b2 = st.columns(2)
 with col_0b1:
     concern_hr_pre = st.checkbox(
-        "👥 HR / Workforce Efficiency",
+        "👥 Workforce Productivity & Talent",
         key="pre_hr")
     concern_kpi_pre = st.checkbox(
-        "📊 Data & KPI Visibility",
+        "📊 Data-Driven Decision Making",
         key="pre_kpi")
     concern_quality_pre = st.checkbox(
-        "🏭 Quality & Process Efficiency",
+        "🏭 Operational Quality & Efficiency",
         key="pre_quality")
 with col_0b2:
     concern_marketing_pre = st.checkbox(
-        "🛒 Customer & Marketing Strategies",
+        "🛒 Customer Growth & Marketing Strategies",
         key="pre_marketing")
     concern_ops_pre = st.checkbox(
-        "🚚 Supply Chain & Operations",
+        "🚚 Supply Chain & Operations Resilience",
         key="pre_ops")
     concern_finance_pre = st.checkbox(
-        "💰 Finance & Cost Control",
+        "💰 Financial Performance & Cost Control",
         key="pre_finance")
 
 # Guidance based on selections
 if concern_marketing_pre and not (
         concern_quality_pre or concern_ops_pre):
     st.info(
-        "📂 For Customer & Marketing analysis, "
+        "📂 For Customer Growth & Marketing "
         "please upload customer transaction "
         "data (with columns like Customer-ID, "
         "Amount, Status, Channel).")
@@ -106,14 +178,14 @@ elif (concern_quality_pre or
         concern_ops_pre) and not (
         concern_marketing_pre):
     st.info(
-        "📂 For Quality & Operations analysis, "
+        "📂 For Operational Quality & Efficiency "
         "please upload production/machine data "
         "(with columns like Machine-ID, "
         "Defect-Rate, Downtime-Mins).")
 elif concern_marketing_pre and (
         concern_quality_pre or concern_ops_pre):
     st.info(
-        "📂 You selected both Marketing and "
+        "📂 You selected both Customer Growth & "
         "Operations concerns — please upload "
         "both types of data files (up to 3 "
         "files supported)!!")
@@ -121,11 +193,11 @@ elif concern_marketing_pre and (
 st.markdown("---")
 
 # ── STEP 0C: UPLOAD YOUR DATA ──
-st.subheader("📂 Step 0C — Upload Your Data")
+st.subheader("📂 Step 0C — Submit Your Business Data")
 st.caption(
-    "Upload up to 3 files (Excel or CSV). "
-    "DXPO MB will auto-detect what each file "
-    "contains — you can confirm or override!!")
+    "Submit up to 3 business data files "
+    "(Excel or CSV). DXPO MB will "
+    "auto-detect content and confirm!!")
 
 MAX_FILES = 3
 
@@ -140,7 +212,7 @@ def detect_file_type(df):
         'spend','price','unit-price',
         'customer','status','channel',
         'payment']):
-        return "Customer & Marketing Strategies"
+        return "Customer Growth & Marketing Strategies"
     if any(k in cols for k in [
         'defect','downtime','machine',
         'units-produced','maintenance',
@@ -150,18 +222,18 @@ def detect_file_type(df):
         'employee','headcount','salary',
         'attendance','performance',
         'department','hire-date']):
-        return "HR / Workforce Efficiency"
+        return "Workforce Productivity & Talent"
     if any(k in cols for k in [
         'budget','profit','expense',
         'cost','invoice','ledger']):
-        return "Finance & Cost Control"
+        return "Financial Performance & Cost Control"
     return "Unknown — please select below"
 
 MODULE_OPTIONS = [
-    "Customer & Marketing Strategies",
+    "Customer Growth & Marketing Strategies",
     "Operations / Quality",
-    "HR / Workforce Efficiency",
-    "Finance & Cost Control",
+    "Workforce Productivity & Talent",
+    "Financial Performance & Cost Control",
     "Unknown — please select below"
 ]
 
@@ -257,7 +329,7 @@ if uploaded_files:
 # merge them into one combined df.
 marketing_dfs = [
     l for l in loaded
-    if l["assigned"] == "Customer & Marketing Strategies"]
+    if l["assigned"] == "Customer Growth & Marketing Strategies"]
 ops_dfs = [
     l for l in loaded
     if l["assigned"] == "Operations / Quality"]
@@ -417,7 +489,7 @@ if ops_df is not None and df is None:
 # downstream code (which historically only
 # checks `df`) still has something to work
 # with for things like the data preview /
-# DXPO DOC interview, which are concern-
+# DXPO Business Interview, which are concern-
 # agnostic.
 if df is None and ops_df is not None:
     df = ops_df
@@ -427,11 +499,11 @@ if df is not None:
 
         # ── STEP 0: PRE-VISIT QUESTIONNAIRE ──
         st.subheader(
-            "📝 Step 0 — Confirm Your Concerns")
+            "📝 Step 0 — Confirm Your DX Focus Areas")
         st.caption(
-            "Your selections from Step 0B are "
-            "shown below — adjust if needed "
-            "now that your data is uploaded!!")
+            "Your challenge selections from Step 0B "
+            "are shown below — adjust if needed "
+            "now that your data has been reviewed!!")
 
         st.markdown(
             "Confirm the area(s) you're most "
@@ -440,49 +512,49 @@ if df is not None:
         col1, col2 = st.columns(2)
         with col1:
             concern_hr = st.checkbox(
-                "👥 HR / Workforce Efficiency",
+                "👥 Workforce Productivity & Talent",
                 value=concern_hr_pre)
             concern_kpi = st.checkbox(
-                "📊 Data & KPI Visibility",
+                "📊 Data-Driven Decision Making",
                 value=concern_kpi_pre)
             concern_quality = st.checkbox(
-                "🏭 Quality & Process Efficiency",
+                "🏭 Operational Quality & Efficiency",
                 value=concern_quality_pre)
         with col2:
             concern_marketing = st.checkbox(
-                "🛒 Customer & Marketing Strategies",
+                "🛒 Customer Growth & Marketing Strategies",
                 value=concern_marketing_pre)
             concern_ops = st.checkbox(
-                "🚚 Supply Chain & Operations",
+                "🚚 Supply Chain & Operations Resilience",
                 value=concern_ops_pre)
             concern_finance = st.checkbox(
-                "💰 Finance & Cost Control",
+                "💰 Financial Performance & Cost Control",
                 value=concern_finance_pre)
 
         concern_areas = []
         if concern_hr:
             concern_areas.append(
-                "HR / Workforce Efficiency")
+                "Workforce Productivity & Talent")
         if concern_kpi:
             concern_areas.append(
-                "Data & KPI Visibility")
+                "Data-Driven Decision Making")
         if concern_quality:
             concern_areas.append(
-                "Quality & Process Efficiency")
+                "Operational Quality & Efficiency")
         if concern_marketing:
             concern_areas.append(
-                "Customer & Marketing Strategies")
+                "Customer Growth & Marketing Strategies")
         if concern_ops:
             concern_areas.append(
-                "Supply Chain & Operations")
+                "Supply Chain & Operations Resilience")
         if concern_finance:
-            concern_areas.append("Finance & Cost Control")
+            concern_areas.append("Financial Performance & Cost Control")
 
         # ── OPEN SYMPTOMS (multi-concern) ──
         st.markdown(
             "Anything else bothering you that "
             "isn't listed above? *(optional — "
-            "like telling the nurse about "
+            "like telling the consultant about "
             "multiple symptoms, each in their "
             "own words)*")
 
@@ -494,11 +566,11 @@ if df is not None:
 
         MAX_CONCERNS = 5
         cat_list = (
-            "HR / Workforce Efficiency, "
-            "Data & KPI Visibility, "
-            "Quality & Process Efficiency, "
-            "Customer & Marketing Strategies, "
-            "Supply Chain & Operations, "
+            "Workforce Productivity & Talent, "
+            "Data-Driven Decision Making, "
+            "Operational Quality & Efficiency, "
+            "Customer Growth & Marketing Strategies, "
+            "Supply Chain & Operations Resilience, "
             "Finance & Cost Control, "
             "or NEW (if none fit)")
 
@@ -511,32 +583,32 @@ if df is not None:
         cat_definitions = (
             "\n\nCategory definitions "
             "(use these to classify):\n"
-            "- HR / Workforce Efficiency: "
+            "- Workforce Productivity & Talent: "
             "staffing, headcount, employee "
             "productivity, absenteeism, "
             "training, workforce planning\n"
-            "- Data & KPI Visibility: "
+            "- Data-Driven Decision Making: "
             "lack of dashboards, reports "
             "take too long, no real-time "
             "data, KPIs not tracked\n"
-            "- Quality & Process Efficiency:"
+            "- Operational Quality & Efficiency:"
             " defect rates, machine downtime,"
             " equipment failures, maintenance"
             " issues, production bottlenecks,"
             " process inefficiency, scrap "
             "rates, rework\n"
-            "- Customer & Marketing "
+            "- Customer Growth & Marketing "
             "Strategies: customer churn, "
             "revenue declining, marketing "
             "effectiveness, sales performance"
             ", customer segmentation, "
             "pricing strategy\n"
-            "- Supply Chain & Operations: "
+            "- Supply Chain & Operations Resilience: "
             "supplier delays, inventory "
             "management, logistics, delivery"
             " performance, procurement, "
             "warehousing\n"
-            "- Finance & Cost Control: "
+            "- Financial Performance & Cost Control: "
             "budget overruns, cost reduction"
             ", profitability, cash flow, "
             "financial reporting\n"
@@ -663,7 +735,7 @@ if df is not None:
         # across reruns from any concern slot
         for c in all_concerns:
             if (c['category'] ==
-                    "Customer & Marketing Strategies"
+                    "Customer Growth & Marketing Strategies"
                     and not concern_marketing):
                 concern_marketing = True
                 label_str = (
@@ -778,9 +850,9 @@ if df is not None:
                         "limited.")
 
                 st.success(
-                    "✅ Marketing Dokku is "
-                    "ready for your selected "
-                    "concern area(s)!!")
+                    "✅ Customer & Marketing "
+                    "Analysis is ready for "
+                    "your selected focus area(s)!!")
                 proceed_to_doc = True
 
             if concern_ops or concern_quality:
@@ -807,9 +879,9 @@ if df is not None:
                         "before continuing.")
                 else:
                     st.success(
-                        "✅ Operations/Quality "
-                        "Dokku is ready for "
-                        "your selected concern "
+                        "✅ Operations & Quality "
+                        "Analysis is ready for "
+                        "your selected focus "
                         "area(s)!!")
                     proceed_to_doc = True
                     proceed_to_ops = True
@@ -819,20 +891,22 @@ if df is not None:
                     concern_ops or
                     concern_quality):
                 st.info(
-                    "🚧 This module is coming "
-                    "soon — Marketing Dokku "
-                    "and Operations/Quality "
-                    "Dokku are available now!!")
+                    "🚧 This module is coming soon — "
+                    "Customer & Marketing and "
+                    "Operations & Quality "
+                    "Analysis are available now!!")
 
         st.markdown("---")
 
         if proceed_to_doc:
-            # ── STEP 2: DXPO DOC ──
+            # ── STEP 2: DXPO BUSINESS INTERVIEW ──
             st.subheader(
-                "🏥 Step 2 — DXPO DOC Interview")
+                "💼 Step 2 — DXPO Business Interview")
             st.caption(
-                "Like Ningendokku — "
-                "we listen first!!")
+                "Tell us more about your "
+                "business context — "
+                "the more we know, the "
+                "sharper the diagnosis!!")
 
             col1, col2 = st.columns(2)
 
@@ -983,7 +1057,7 @@ if df is not None:
             st.markdown("---")
 
             # ── DXPO DOC SUMMARY BOX ──
-            st.subheader("📋 DXPO DOC Summary")
+            st.subheader("📋 DXPO Business Interview Summary")
             col1, col2 = st.columns(2)
             with col1:
                 st.info(f"""
@@ -1027,7 +1101,7 @@ if df is not None:
             st.subheader(
                 "🔬 Step 2B — Optional Questions")
             st.caption(
-                "Like Ningendokku premium package!! "
+                "Optional deeper context — the more "
                 "Answer for deeper analysis — "
                 "or skip to proceed!!")
 
@@ -1154,7 +1228,7 @@ if df is not None:
             # ── STEP 3: RUN ANALYSIS ──
             if concern_marketing:
                 if st.button(
-                    "🔬 Run Marketing Dokku + "
+                    "🔬 Run Customer & Marketing Analysis + "
                     "Generate DXPO Report!!",
                     type="primary",
                     use_container_width=True):
@@ -1162,7 +1236,7 @@ if df is not None:
 
             if proceed_to_ops:
                 if st.button(
-                    "🏭 Run Operations/Quality "
+                    "🏭 Run Operations & Quality "
                     "Dokku + Generate DXPO "
                     "Report!!",
                     type="primary",
@@ -1442,7 +1516,7 @@ if df is not None:
                     st.markdown("---")
                     st.subheader(
                         "🔬 Step 3 — "
-                        "Marketing Dokku Results")
+                        "Customer & Marketing Analysis")
 
                     red_pts = [p for p in
                         pain_points
@@ -1545,7 +1619,7 @@ if df is not None:
 
                     # ── TEST DETAILS ──
                     st.markdown(
-                        "### 🔬 Marketing Dokku — Test Details")
+                        "### 🔬 Customer & Marketing — Test Details")
                     st.caption(
                         "Standard + Adaptive tests · "
                         "Based on YOUR interview!!")
@@ -1710,7 +1784,7 @@ if df is not None:
                                     "precise measurement.")
 
                     # ── COMPLETE RESULTS TABLE ──
-                    st.markdown("### 📊 Marketing Dokku — Complete Test Results")
+                    st.markdown("### 📊 Customer & Marketing — Complete Test Results")
                     st.caption("All tests run · Standard + Adaptive · Based on YOUR interview!!")
 
                     # Build complete test results
@@ -1817,7 +1891,7 @@ if df is not None:
 
                     fig_tests.update_layout(
                         title=dict(
-                            text="🔬 Marketing Dokku — All Test Results",
+                            text="🔬 Customer & Marketing — All Test Results",
                             x=0.5,
                             font=dict(
                                 size=14,
@@ -2333,8 +2407,8 @@ if df is not None:
                     st.markdown("---")
                     st.subheader(
                         "🏭 Step 3 — "
-                        "Operations/Quality "
-                        "Dokku Results")
+                        "Operations & Quality "
+                        "Analysis Results")
 
                     red_o = [p for p in
                         ops_pain_points
