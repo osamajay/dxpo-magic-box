@@ -12,14 +12,14 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jul 07, 2026-->dxpo_app (41) in Higashi-PC) version
+# Header Jul 09, 2026-->dxpo_app (42) in Higashi-PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(41) July 07, 2026-23:14)")
+    "Process Optimization ver(42) July 09, 2026-23:42)")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -2681,9 +2681,9 @@ if df is not None:
                     st.markdown("---")
                     st.markdown(
                         "### 📊 "
-                        "Operations/Quality "
-                        "Dokku — Complete "
-                        "Test Results")
+                        "Operations & Quality "
+                        "Analysis — Complete "
+                        "Test Results Table")
                     ops_table_rows = (
                         [[p['test'],
                           'Standard',
@@ -2692,6 +2692,15 @@ if df is not None:
                          for p in
                          ops_pain_points])
                     if ops_table_rows:
+                        # Dynamic height so
+                        # ALL rows show —
+                        # header 45px +
+                        # 38px per row +
+                        # 60px margin
+                        ops_tbl_h = (
+                            45 +
+                            len(ops_table_rows)
+                            * 38 + 60)
                         ops_fig = go.Figure(
                             data=[go.Table(
                             header=dict(
@@ -2715,7 +2724,7 @@ if df is not None:
                                 align='left'))
                         ])
                         ops_fig.update_layout(
-                            height=300)
+                            height=ops_tbl_h)
                         st.plotly_chart(
                             ops_fig,
                             use_container_width=
