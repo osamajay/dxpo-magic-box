@@ -12,14 +12,14 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jul 09, 2026-->dxpo_app (42) in Higashi-PC) version
+# Header Jul 07, 2026-->dxpo_app (43) in Higashi-PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(42) July 09, 2026-23:42)")
+    "Process Optimization ver(43) July 10, 2026-21:39)")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -2692,15 +2692,15 @@ if df is not None:
                          for p in
                          ops_pain_points])
                     if ops_table_rows:
-                        # Dynamic height so
-                        # ALL rows show —
-                        # header 45px +
-                        # 38px per row +
-                        # 60px margin
-                        ops_tbl_h = (
+                        # Dynamic height —
+                        # 80px per row gives
+                        # enough space for
+                        # wrapped finding text
+                        ops_tbl_h = max(
+                            400,
                             45 +
                             len(ops_table_rows)
-                            * 38 + 60)
+                            * 80 + 80)
                         ops_fig = go.Figure(
                             data=[go.Table(
                             header=dict(
