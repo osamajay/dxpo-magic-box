@@ -12,14 +12,14 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jul 07, 2026-->dxpo_app (43) in Higashi-PC) version
+# Header Jul 07, 2026-->dxpo_app (20-U) in Urasa-PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(43) July 10, 2026-21:39)")
+    "Process Optimization ver(20-U) July 11, 2026-13:31)")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -1060,7 +1060,13 @@ if df is not None:
             st.subheader("📋 DXPO Business Interview Summary")
             col1, col2 = st.columns(2)
             with col1:
+                company_display = (
+                    company_name
+                    if company_name
+                    else "*(not provided)*")
                 st.info(f"""
+    **🏢 Company:** {company_display}
+
     **🏭 Industry:** {industry}
 
     **🎯 Primary Concern:** {concern_primary}
@@ -1101,9 +1107,38 @@ if df is not None:
             st.subheader(
                 "🔬 Step 2B — Optional Questions")
             st.caption(
-                "Optional deeper context — the more "
-                "Answer for deeper analysis — "
-                "or skip to proceed!!")
+                "Optional deeper context — "
+                "the more you answer, the "
+                "sharper and more personalised "
+                "your DXPO Diagnostic Report!!")
+
+            # Company Name — always visible,
+            # prominently displayed, optional
+            # but highly recommended
+            st.markdown(
+                "**🏢 Your Company Name** "
+                "*(optional — used to "
+                "personalise your DXPO "
+                "Diagnostic Report)*")
+            company_name = st.text_input(
+                "Company Name:",
+                placeholder=
+                "e.g. ABC KK, XYZ Corp, "
+                "Tanaka Manufacturing Ltd",
+                key="company_name")
+            if company_name:
+                st.success(
+                    f"✅ Report will be "
+                    f"personalised for: "
+                    f"**{company_name}**")
+            else:
+                st.caption(
+                    "💡 Enter your company "
+                    "name for a personalised "
+                    "report — or leave blank "
+                    "to proceed anonymously.")
+
+            st.markdown("---")
 
             show_optional = st.checkbox(
                 "✅ Yes — I want deeper analysis "
@@ -2135,9 +2170,20 @@ if df is not None:
                     # ── CLAUDE REPORT ──
                     st.subheader(
                         "🪄 Step 5 — DXPO Report")
+                    if company_name:
+                        st.caption(
+                            f"Personalised for: "
+                            f"**{company_name}**")
 
+                    company_ref = (
+                        company_name
+                        if company_name
+                        else "the client company")
                     summary = (
+                        f"Company: {company_ref}\n"
                         f"Industry: {industry}\n"
+                        f"Sector: {primary_sector}"
+                        f" — {sub_sector}\n"
                         f"Concern: {concern_primary}\n"
                         f"Pain points found: "
                         f"{len(pain_points)}\n")
@@ -2921,13 +2967,26 @@ if df is not None:
                     st.subheader(
                         "🪄 Step 5 — "
                         "DXPO Report")
-                    st.caption(
-                        "Operations/Quality "
-                        "Edition")
+                    if company_name:
+                        st.caption(
+                            f"Personalised for: "
+                            f"**{company_name}**")
+                    else:
+                        st.caption(
+                            "Operations/Quality "
+                            "Edition")
 
+                    company_ref_ops = (
+                        company_name
+                        if company_name
+                        else "the client company")
                     ops_summary = (
+                        "Company: " +
+                        company_ref_ops + "\n"
                         "Industry: " +
                         industry + "\n"
+                        "Sector: " +
+                        primary_sector + "\n"
                         "Company type: " +
                         company_type + "\n"
                         "Primary concern: " +
