@@ -12,14 +12,14 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jul 11, 2026-->dxpo_app (20-U) in Urasa-PC) version
+# Header Jul 11, 2026-->dxpo_app (21-U) in Urasa-PC) version
 st.title("🪄 DXPO AI Magic Box")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(20-U) July 11, 2026-13:31)")
+    "Process Optimization ver(21-U) July 11, 2026-14:56)")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -1056,6 +1056,16 @@ if df is not None:
 
             st.markdown("---")
 
+            # Safe default — will be
+            # overridden by Step 2B input
+            if 'company_name' not in (
+                    st.session_state):
+                st.session_state[
+                    'company_name'] = ""
+            company_name = (
+                st.session_state.get(
+                    'company_name', ""))
+
             # ── DXPO DOC SUMMARY BOX ──
             st.subheader("📋 DXPO Business Interview Summary")
             col1, col2 = st.columns(2)
@@ -1126,6 +1136,10 @@ if df is not None:
                 "e.g. ABC KK, XYZ Corp, "
                 "Tanaka Manufacturing Ltd",
                 key="company_name")
+            # Persist to session_state
+            st.session_state[
+                'company_name'] = (
+                company_name)
             if company_name:
                 st.success(
                     f"✅ Report will be "
