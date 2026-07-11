@@ -7,19 +7,54 @@ import os
 import warnings
 warnings.filterwarnings("ignore")
 
+
+def d_badge(num, label):
+    """Blue Data Input badge header"""
+    st.markdown(
+        f'''<div style="
+            display:inline-block;
+            background:#1F4E79;
+            color:white;
+            padding:6px 14px;
+            border-radius:20px;
+            font-weight:bold;
+            font-size:15px;
+            margin-bottom:8px;
+            letter-spacing:0.5px;">
+            D{num} — {label}
+        </div>''',
+        unsafe_allow_html=True)
+
+def a_badge(num, label):
+    """Orange Analytics badge header"""
+    st.markdown(
+        f'''<div style="
+            display:inline-block;
+            background:#E8510A;
+            color:white;
+            padding:6px 14px;
+            border-radius:20px;
+            font-weight:bold;
+            font-size:15px;
+            margin-bottom:8px;
+            letter-spacing:0.5px;">
+            A{num} — {label}
+        </div>''',
+        unsafe_allow_html=True)
+
 st.set_page_config(
     page_title="DXPO AI Magic Box",
     page_icon="🪄",
     layout="wide")
 
-# Header Jul 11, 2026-->dxpo_app (22-U) in Urasa-PC) version
-st.title("🪄 DXPO AI Magic Box")
+# Header Jul 11, 2026-->dxpo_app (23-U) in Urasa-PC) version
+st.title("🪄 DXPO AI — Business Pain Point Diagnostics & DX Strategy")
 st.subheader(
     "Dr. Jay Rajasekera | "
     "Tokyo International University")
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(22-U) July 11, 2026-15:55)")
+    "Process Optimization ver(23-U) July 11, 2026-22:09)")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -27,7 +62,7 @@ st.markdown("---")
 # (answered BEFORE uploading any data,
 #  completed before submitting any data)
 # ══════════════════════════════════════════
-st.subheader("📝 Step 0A — Your Company Business Sector")
+d_badge(1, "Your Company Business Sector")
 st.caption(
     "Tell us about your company's business "
     "sector — this shapes your entire "
@@ -134,7 +169,7 @@ st.markdown("---")
 # (still before upload — tells us what
 #  data to ask for in Step 0C)
 # ══════════════════════════════════════════
-st.subheader("📋 Step 0B — Your Business Challenges")
+d_badge(2, "Your Business Challenges")
 st.caption(
     "Select your key business challenges — "
     "this determines which DX diagnostic "
@@ -193,7 +228,7 @@ elif concern_marketing_pre and (
 st.markdown("---")
 
 # ── STEP 0C: UPLOAD YOUR DATA ──
-st.subheader("📂 Step 0C — Submit Your Business Data")
+d_badge(4, "Submit Your Business Data")
 st.caption(
     "Submit up to 3 business data files "
     "(Excel or CSV). DXPO MB will "
@@ -498,8 +533,7 @@ if df is not None:
     try:
 
         # ── STEP 0: PRE-VISIT QUESTIONNAIRE ──
-        st.subheader(
-            "📝 Step 0 — Confirm Your DX Focus Areas")
+        d_badge(3, "Confirm Your DX Focus Areas")
         st.caption(
             "Your challenge selections from Step 0B "
             "are shown below — adjust if needed "
@@ -900,8 +934,7 @@ if df is not None:
 
         if proceed_to_doc:
             # ── STEP 2: DXPO BUSINESS INTERVIEW ──
-            st.subheader(
-                "💼 Step 2 — DXPO Business Interview")
+            d_badge(5, "DXPO Business Interview")
             st.caption(
                 "Tell us more about your "
                 "business context — "
@@ -1061,7 +1094,7 @@ if df is not None:
                 'company_name_val', "")
 
             # ── DXPO DOC SUMMARY BOX ──
-            st.subheader("📋 DXPO Business Interview Summary")
+            st.markdown("**📋 DXPO Business Interview Summary**")
             col1, col2 = st.columns(2)
             with col1:
                 company_display = (
@@ -1108,8 +1141,7 @@ if df is not None:
             st.markdown("---")
 
             # ── STEP 2B: OPTIONAL QUESTIONS ──
-            st.subheader(
-                "🔬 Step 2B — Optional Questions")
+            d_badge(6, "Optional Business Context")
             st.caption(
                 "Optional deeper context — "
                 "the more you answer, the "
@@ -1559,9 +1591,7 @@ if df is not None:
 
                     # ── SHOW RESULTS ──
                     st.markdown("---")
-                    st.subheader(
-                        "🔬 Step 3 — "
-                        "Customer & Marketing Analysis")
+                    a_badge(2, "Customer & Marketing Analysis Results")
 
                     red_pts = [p for p in
                         pain_points
@@ -2039,9 +2069,7 @@ if df is not None:
                     st.markdown("---")
 
                     # ── IMPACT EVALUATION ──
-                    st.subheader(
-                        "🎯 Step 4 — "
-                        "DXPO Impact Evaluation")
+                    a_badge(4, "DXPO Impact Evaluation")
                     st.caption(
                         "Figure 4 · "
                         "Dr. Jay Rajasekera · "
@@ -2178,12 +2206,11 @@ if df is not None:
                     st.markdown("---")
 
                     # ── CLAUDE REPORT ──
-                    st.subheader(
-                        "🪄 Step 5 — DXPO Report")
+                    a_badge(6, "DXPO AI Report")
                     if company_name:
-                        st.caption(
-                            f"Personalised for: "
-                            f"**{company_name}**")
+                        st.markdown(
+                            '<h3 style="color:#1F4E79;">📋 Personalised for: ' + str(company_name) + '</h3>',
+                            unsafe_allow_html=True)
 
                     company_ref = (
                         company_name
@@ -2461,10 +2488,7 @@ if df is not None:
 
                     # ── SHOW RESULTS ──
                     st.markdown("---")
-                    st.subheader(
-                        "🏭 Step 3 — "
-                        "Operations & Quality "
-                        "Analysis Results")
+                    a_badge(2, "Operations & Quality Analysis Results")
 
                     red_o = [p for p in
                         ops_pain_points
@@ -2789,9 +2813,7 @@ if df is not None:
                     st.markdown("---")
 
                     # ── OPS STEP 4: IMPACT ──
-                    st.subheader(
-                        "🎯 Step 4 — "
-                        "DXPO Impact Evaluation")
+                    a_badge(4, "DXPO Impact Evaluation")
                     st.caption(
                         "Figure 4 · "
                         "Dr. Jay Rajasekera · "
@@ -2974,13 +2996,11 @@ if df is not None:
                     st.markdown("---")
 
                     # ── OPS STEP 5: REPORT ──
-                    st.subheader(
-                        "🪄 Step 5 — "
-                        "DXPO Report")
+                    a_badge(6, "DXPO AI Report")
                     if company_name:
-                        st.caption(
-                            f"Personalised for: "
-                            f"**{company_name}**")
+                        st.markdown(
+                            '<h3 style="color:#1F4E79;">📋 Personalised for: ' + str(company_name) + '</h3>',
+                            unsafe_allow_html=True)
                     else:
                         st.caption(
                             "Operations/Quality "
