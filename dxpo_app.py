@@ -54,7 +54,7 @@ T = {
     "EN": {
         "title":
             "🪄 DXPO AI — Business Pain "
-            "Point Diagnostics & DX Strategy: ver 43-T",
+            "Point Diagnostics & DX Strategy",
         "subtitle":
             "Dr. Jay Rajasekera | "
             "Tokyo International University",
@@ -147,7 +147,7 @@ L = T[st.session_state['lang']]
 
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization | DXPOIT.com")
+    "Process Optimization ver 44-T| DXPOIT.com")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -1844,6 +1844,304 @@ if df is not None:
                                     f" revenue at risk",
                                 "flag": "🔴 RED"})
 
+                    # ── COMPUTABLE CONCERN
+                    # TESTS (Step 2 & 3) ──
+                    # For each user-stated
+                    # concern, check if it's
+                    # computable from the data.
+                    # NEVER silently drop a
+                    # concern — always
+                    # acknowledge it.
+                    all_concerns_for_test = (
+                        st.session_state.get(
+                            'all_concerns', []))
+
+                    for idx, c in enumerate(
+                            all_concerns_for_test,
+                            1):
+                        c_text = c.get(
+                            'text', '').lower()
+                        c_raw = c.get(
+                            'text', '')
+
+                        # ── PARETO TEST ──
+                        # Triggered by: "pareto",
+                        # "80/20", "product",
+                        # "top products", etc.
+                        is_pareto = any(
+                            kw in c_text for kw
+                            in ['pareto', '80/20',
+                                '80%', 'top product',
+                                'product type',
+                                'product mix',
+                                'which product'])
+
+                        # ── REPEAT CUSTOMER ──
+                        # Triggered by: "repeat",
+                        # "returning", "loyal"
+                        is_repeat = any(
+                            kw in c_text for kw
+                            in ['repeat', 'return',
+                                'loyal', 'frequency',
+                                'how often'])
+
+                        # ── STORE COMPARISON ──
+                        # Triggered by: "store",
+                        # "branch", "location"
+                        is_store = any(
+                            kw in c_text for kw
+                            in ['store', 'branch',
+                                'location', 'by store',
+                                'per store'])
+
+                        if is_pareto and (
+                                'Product' in
+                                str(df.columns)):
+                            try:
+                                prod_col = next(
+                                    (c for c in
+                                    df.columns if
+                                    'Product' in c
+                                    or 'product' in
+                                    c.lower()), None)
+                                amt_col_p = next(
+                                    (c for c in
+                                    df.columns if
+                                    'Amt' in c or
+                                    'amount' in
+                                    c.lower() or
+                                    'revenue' in
+                                    c.lower()), None)
+                                if (prod_col and
+                                        amt_col_p):
+                                    by_prod = (
+                                        df.groupby(
+                                        prod_col)[
+                                        amt_col_p]
+                                        .sum()
+                                        .sort_values(
+                                        ascending=
+                                        False))
+                                    total_rev = (
+                                        by_prod.sum())
+                                    cumulative = 0
+                                    pareto_rows = []
+                                    for prod, rev in (
+                                            by_prod
+                                            .items()):
+                                        pct = (
+                                            rev /
+                                            total_rev
+                                            * 100)
+                                        cumulative += pct
+                                        pareto_rows\
+                                            .append({
+                                            'Product':
+                                                prod,
+                                            'Revenue':
+                                                f"${rev:,.0f}",
+                                            '% of Total':
+                                                f"{pct:.1f}%",
+                                            'Cumulative':
+                                                f"{cumulative:.1f}%"
+                                        })
+                                    # Find 80%
+                                    # threshold
+                                    top_n = sum(
+                                        1 for r in
+                                        pareto_rows
+                                        if float(
+                                        r['Cumulative']
+                                        .replace('%',''))
+                                        <= 80)
+                                    top_pct = round(
+                                        top_n /
+                                        len(
+                                        pareto_rows)
+                                        * 100, 1)
+                                    finding = (
+                                        f"Top {top_n}"
+                                        f" of "
+                                        f"{len(pareto_rows)}"
+                                        f" products "
+                                        f"({top_pct}%"
+                                        f" of range) "
+                                        f"generate "
+                                        f"80% of "
+                                        f"revenue — "
+                                        f"classic "
+                                        f"Pareto "
+                                        f"pattern "
+                                        f"confirmed.")
+                                    flag = (
+                                        "🔴 RED"
+                                        if top_pct
+                                        <= 30 else
+                                        "🟡 YELLOW"
+                                        if top_pct
+                                        <= 50 else
+                                        "🟢 GREEN")
+                                    pain_points\
+                                        .append({
+                                        "test":
+                                            f"Concern"
+                                            f" {idx}: "
+                                            f"Pareto "
+                                            f"— Product"
+                                            f" Revenue "
+                                            f"Mix",
+                                        "finding":
+                                            finding,
+                                        "flag": flag,
+                                        "pareto_data":
+                                            pareto_rows
+                                    })
+                            except Exception as pe:
+                                pain_points.append({
+                                    "test":
+                                        f"Concern "
+                                        f"{idx}: "
+                                        f"Pareto "
+                                        f"Analysis",
+                                    "finding":
+                                        "Could not "
+                                        "compute: "
+                                        + str(pe),
+                                    "flag":
+                                        "🟡 YELLOW"
+                                })
+
+                        elif (is_repeat and
+                                status_col):
+                            try:
+                                # Repeat customer
+                                # % by store
+                                store_col = next(
+                                    (c for c in
+                                    df.columns if
+                                    'Store' in c or
+                                    'store' in
+                                    c.lower()), None)
+                                cust_col = next(
+                                    (c for c in
+                                    df.columns if
+                                    'Customer' in c
+                                    or 'customer'
+                                    in c.lower()),
+                                    None)
+                                if (store_col and
+                                        cust_col):
+                                    multi_buy = (
+                                        df.groupby(
+                                        cust_col)[
+                                        store_col]
+                                        .count())
+                                    repeat_pct = (
+                                        (multi_buy > 1)
+                                        .mean() * 100)
+                                    if store_col:
+                                        by_store = {}
+                                        for st_name \
+                                                in df[
+                                                store_col
+                                                ].unique():
+                                            st_custs = (
+                                                df[df[
+                                                store_col]
+                                                ==
+                                                st_name][
+                                                cust_col]
+                                                .value_counts())
+                                            by_store[
+                                                st_name]\
+                                                = round(
+                                                (
+                                                st_custs
+                                                > 1)
+                                                .mean()
+                                                * 100,
+                                                1)
+                                        store_str = (
+                                            ", ".join(
+                                            f"{k}: "
+                                            f"{v}%"
+                                            for k,v
+                                            in
+                                            by_store
+                                            .items()))
+                                        finding = (
+                                            f"Repeat "
+                                            f"customer "
+                                            f"rate: "
+                                            f"{repeat_pct:.1f}%"
+                                            f" overall. "
+                                            f"By store: "
+                                            f"{store_str}")
+                                        flag = (
+                                            "🔴 RED"
+                                            if
+                                            repeat_pct
+                                            < 40 else
+                                            "🟡 YELLOW"
+                                            if
+                                            repeat_pct
+                                            < 60 else
+                                            "🟢 GREEN")
+                                        pain_points\
+                                            .append({
+                                            "test":
+                                                f"Concern"
+                                                f" {idx}:"
+                                                f" Repeat"
+                                                f" Customer"
+                                                f" % by"
+                                                f" Store",
+                                            "finding":
+                                                finding,
+                                            "flag":
+                                                flag
+                                        })
+                            except Exception as re:
+                                pain_points.append({
+                                    "test":
+                                        f"Concern "
+                                        f"{idx}: "
+                                        f"Repeat "
+                                        f"Customer",
+                                    "finding":
+                                        "Could not "
+                                        "compute: "
+                                        + str(re),
+                                    "flag":
+                                        "🟡 YELLOW"
+                                })
+
+                        else:
+                            # Step 3: NEVER silently
+                            # drop — add acknowledgment
+                            # even if not computable
+                            pain_points.append({
+                                "test":
+                                    f"Concern "
+                                    f"{idx}: \""
+                                    + c_raw[:40]
+                                    + "\"",
+                                "finding":
+                                    "User-stated "
+                                    "concern: \""
+                                    + c_raw +
+                                    "\". This "
+                                    "concern has "
+                                    "been noted "
+                                    "and will be "
+                                    "addressed in "
+                                    "the DXPO AI "
+                                    "Report with "
+                                    "specific DX "
+                                    "recommendations.",
+                                "flag": "🟡 YELLOW"
+                            })
+
                     # SYMPTOM TESTS: one per
                     # concern the user described
                     # in Step 0. Each gets its
@@ -2594,6 +2892,86 @@ if df is not None:
                         company_name
                         if company_name
                         else "the client company")
+                    # Build D6 context summary
+                    # for location/sector-aware
+                    # recommendations
+                    ctx = opt_context if (
+                        'opt_context' in dir()
+                        or 'opt_context' in
+                        locals()) else {}
+                    d6_summary = ""
+                    if ctx:
+                        if ctx.get('country',
+                            'Not answered') != (
+                                'Not answered'):
+                            d6_summary += (
+                                "Country: " +
+                                ctx['country']
+                                + "\n")
+                        if ctx.get(
+                            'company_size',
+                            'Not answered') != (
+                                'Not answered'):
+                            d6_summary += (
+                                "Company size: "
+                                + ctx[
+                                'company_size']
+                                + "\n")
+                        if ctx.get(
+                            'digital_tools',
+                            'Not answered') != (
+                                'Not answered'):
+                            d6_summary += (
+                                "Current tools: "
+                                + ctx[
+                                'digital_tools']
+                                + "\n")
+                        if ctx.get('dx_budget',
+                            'Not answered') != (
+                                'Not answered'):
+                            d6_summary += (
+                                "DX budget: " +
+                                ctx['dx_budget']
+                                + "\n")
+                        if ctx.get('timeline',
+                            'Not answered') != (
+                                'Not answered'):
+                            d6_summary += (
+                                "Timeline: " +
+                                ctx['timeline']
+                                + "\n")
+                        if ctx.get(
+                            'competitors',
+                            'Not answered') != (
+                                'Not answered'):
+                            d6_summary += (
+                                "Competitors: "
+                                + ctx[
+                                'competitors']
+                                + "\n")
+
+                    # Add stated concerns
+                    all_c_for_report = (
+                        st.session_state.get(
+                        'all_concerns', []))
+                    stated_concerns_str = ""
+                    if all_c_for_report:
+                        stated_concerns_str = (
+                            "\nUser-stated "
+                            "concerns:\n")
+                        for ci, cv in enumerate(
+                                all_c_for_report,
+                                1):
+                            stated_concerns_str\
+                                += (
+                                str(ci) + ". \""
+                                + cv.get(
+                                'text', '') +
+                                "\" → " +
+                                cv.get(
+                                'category', '')
+                                + "\n")
+
                     summary = (
                         f"Company: {company_ref}\n"
                         f"Industry: {industry}\n"
@@ -2601,7 +2979,9 @@ if df is not None:
                         f" — {sub_sector}\n"
                         f"Concern: {concern_primary}\n"
                         f"Pain points found: "
-                        f"{len(pain_points)}\n")
+                        f"{len(pain_points)}\n"
+                        + d6_summary
+                        + stated_concerns_str)
                     for p in impact_scores:
                         summary += (
                             f"#{p['rank']} "
@@ -2625,15 +3005,40 @@ if df is not None:
     Dr. Jay Rajasekera,
     Tokyo International University.
 
-    Generate professional DXPO report:
+    Generate a professional DXPO AI
+    Diagnostic Report for:
     {summary}
+
+    IMPORTANT INSTRUCTIONS:
+    1. Address the company by name
+    2. Where relevant, provide
+       LOCATION-SPECIFIC recommendations
+       (e.g. if Japan, mention Japanese
+       DX trends, tools, regulations)
+    3. Reference SECTOR-SPECIFIC DX
+       methods relevant to their
+       declared sub-sector
+    4. Consider their company SIZE,
+       BUDGET and CURRENT TOOLS when
+       making recommendations
+    5. For each user-stated concern,
+       explicitly acknowledge it and
+       recommend what DX approach or
+       consultant type could address it
+    6. End with a clear statement that
+       qualified DX consultants and
+       solution providers exist to help
+       implement these recommendations
 
     Include:
     1. EXECUTIVE SUMMARY
-    2. TOP PAIN POINTS
-    3. RECOMMENDED DX APPROACH
-    4. QUICK WINS (30 days)
-    5. STRATEGIC ROADMAP
+    2. TOP PAIN POINTS DETECTED
+    3. USER-STATED CONCERNS & DX RESPONSE
+    4. RECOMMENDED DX APPROACH
+       (location & sector specific)
+    5. QUICK WINS (30 days)
+    6. STRATEGIC ROADMAP (6 months)
+    7. NEXT STEPS & SPECIALIST REFERRAL
     """
                             }]))
                         report = (
@@ -3395,6 +3800,8 @@ if df is not None:
                         industry + "\n"
                         "Sector: " +
                         primary_sector + "\n"
+                        "Sub-sector: " +
+                        sub_sector + "\n"
                         "Company type: " +
                         company_type + "\n"
                         "Primary concern: " +
@@ -3402,7 +3809,9 @@ if df is not None:
                         "Pain points found: "
                         + str(len(
                         ops_pain_points))
-                        + "\n")
+                        + "\n"
+                        + d6_summary
+                        + stated_concerns_str)
                     for op in (
                             ops_impact_scores):
                         ops_summary += (
@@ -3442,25 +3851,54 @@ if df is not None:
                                 " University."
                                 "\n\nGenerate "
                                 "a professional"
-                                " DXPO report "
-                                "for an "
-                                "Operations/"
+                                " DXPO AI "
+                                "Diagnostic "
+                                "Report for an"
+                                " Operations/"
                                 "Quality DX "
                                 "diagnostic:\n"
                                 + ops_summary
-                                + "\n\nInclude:"
+                                + "\n\nIMPORTANT"
+                                " INSTRUCTIONS:"
+                                "\n1. Address "
+                                "company by name"
+                                "\n2. Provide "
+                                "LOCATION-SPECIFIC"
+                                " recommendations"
+                                " where relevant"
+                                "\n3. Reference "
+                                "SECTOR-SPECIFIC"
+                                " DX methods"
+                                "\n4. Consider "
+                                "size, budget "
+                                "& current tools"
+                                "\n5. Address "
+                                "each user-stated"
+                                " concern "
+                                "explicitly"
+                                "\n6. End with "
+                                "specialist "
+                                "referral "
+                                "recommendation"
+                                "\n\nInclude:"
                                 "\n1. EXECUTIVE"
                                 " SUMMARY"
                                 "\n2. TOP "
                                 "OPERATIONAL "
                                 "PAIN POINTS"
-                                "\n3. RECOMMENDED"
+                                "\n3. USER-STATED"
+                                " CONCERNS & "
+                                "DX RESPONSE"
+                                "\n4. RECOMMENDED"
                                 " DX APPROACH"
-                                "\n4. QUICK WINS"
+                                "\n5. QUICK WINS"
                                 " (30 days)"
-                                "\n5. STRATEGIC"
+                                "\n6. STRATEGIC"
                                 " ROADMAP "
-                                "(6 months)"}
+                                "(6 months)"
+                                "\n7. NEXT STEPS"
+                                " & SPECIALIST"
+                                " REFERRAL"}
                             ]))
                         ops_report = (
                             ops_msg
