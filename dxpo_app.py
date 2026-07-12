@@ -47,14 +47,107 @@ st.set_page_config(
     page_icon="🪄",
     layout="wide")
 
-# Header Jul 11, 2026-->dxpo_app (23-U) in Urasa-PC) version
-st.title("🪄 DXPO AI — Business Pain Point Diagnostics & DX Strategy")
-st.subheader(
-    "Dr. Jay Rajasekera | "
-    "Tokyo International University")
+# ── LANGUAGE DICTIONARY ──────────────────
+# "Essential Japanese" for Wednesday demo
+# Full translation comes later
+T = {
+    "EN": {
+        "title":
+            "🪄 DXPO AI — Business Pain "
+            "Point Diagnostics & DX Strategy: ver 43-T",
+        "subtitle":
+            "Dr. Jay Rajasekera | "
+            "Tokyo International University",
+        "d1": "Your Company Business Sector",
+        "d2": "Your Business Challenges",
+        "d3": "Confirm Your DX Focus Areas",
+        "d4": "Submit Your Business Data",
+        "a1": "Data Sufficiency Rank",
+        "d5": "DXPO Business Interview",
+        "d6": "Optional Business Context",
+        "a2_mkt":
+            "Customer & Marketing "
+            "Analysis Results",
+        "a2_ops":
+            "Operations & Quality "
+            "Analysis Results",
+        "a4": "DXPO Impact Evaluation",
+        "a6": "DXPO AI Report",
+        "btn_mkt":
+            "🔬 Run Customer & Marketing "
+            "Analysis + Generate DXPO "
+            "Report!!",
+        "btn_ops":
+            "🏭 Run Operations & Quality "
+            "Analysis + Generate DXPO "
+            "Report!!",
+        "report_title":
+            L["report_title"],
+        "toggle_label": "🇯🇵 日本語",
+    },
+    "JP": {
+        "title":
+            "🪄 DXPO AI — "
+            "ビジネス課題診断 & DX戦略",
+        "subtitle":
+            "ジェイ・ラジャセケラ博士 | "
+            "東京国際大学",
+        "d1": "事業セクター",
+        "d2": "ビジネス課題",
+        "d3": "DX重点分野の確認",
+        "d4": "ビジネスデータの提出",
+        "a1": "データ適合性評価",
+        "d5": "DXPOビジネスインタビュー",
+        "d6": "追加情報（任意）",
+        "a2_mkt":
+            "顧客・マーケティング分析結果",
+        "a2_ops":
+            "オペレーション・品質分析結果",
+        "a4": "DXPOインパクト評価",
+        "a6": "DXPO AIレポート",
+        "btn_mkt":
+            "🔬 顧客・マーケティング分析を"
+            "実行 + DXPOレポート生成!!",
+        "btn_ops":
+            "🏭 オペレーション・品質分析を"
+            "実行 + DXPOレポート生成!!",
+        "report_title":
+            "DXPO AI 診断レポート",
+        "toggle_label": "🇺🇸 English",
+    }
+}
+
+# ── LANGUAGE TOGGLE ──────────────────────
+if 'lang' not in st.session_state:
+    st.session_state['lang'] = 'EN'
+
+# Toggle button in top-right column
+hcol1, hcol2 = st.columns([6, 1])
+with hcol1:
+    st.title(T[st.session_state['lang']]
+             ['title'])
+    st.subheader(
+        T[st.session_state['lang']]
+        ['subtitle'])
+with hcol2:
+    st.markdown("###")
+    if st.button(
+        T[st.session_state['lang']]
+        ['toggle_label'],
+        key="lang_toggle",
+        use_container_width=True):
+        st.session_state['lang'] = (
+            'JP' if
+            st.session_state['lang'] == 'EN'
+            else 'EN')
+        st.rerun()
+
+# Shorthand for current language dict
+L = T[st.session_state['lang']]
+
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver(23-U) July 11, 2026-22:09)")
+    "Process Optimization | DXPOIT.com")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -62,7 +155,7 @@ st.markdown("---")
 # (answered BEFORE uploading any data,
 #  completed before submitting any data)
 # ══════════════════════════════════════════
-d_badge(1, "Your Company Business Sector")
+d_badge(1, L["d1"])
 st.caption(
     "Tell us about your company's business "
     "sector — this shapes your entire "
@@ -169,7 +262,7 @@ st.markdown("---")
 # (still before upload — tells us what
 #  data to ask for in Step 0C)
 # ══════════════════════════════════════════
-d_badge(2, "Your Business Challenges")
+d_badge(2, L["d2"])
 st.caption(
     "Select your key business challenges — "
     "this determines which DX diagnostic "
@@ -228,7 +321,7 @@ elif concern_marketing_pre and (
 st.markdown("---")
 
 # ── STEP 0C: UPLOAD YOUR DATA ──
-d_badge(4, "Submit Your Business Data")
+d_badge(4, L["d4"])
 st.caption(
     "Submit up to 3 business data files "
     "(Excel or CSV). DXPO MB will "
@@ -532,8 +625,296 @@ if df is None and ops_df is not None:
 if df is not None:
     try:
 
+        # ── A1: DATA SUFFICIENCY RANK ────────
+        st.markdown("---")
+        a_badge(1, L["a1"])
+        st.caption(
+            "AI-powered check: how well does "
+            "your submitted data align with "
+            "your declared business sector "
+            "and challenges？ Scale: "
+            "0 (not suitable) → 5 (excellent)")
+
+        # Gather context for scoring
+        selected_concerns = []
+        if st.session_state.get('pre_hr'):
+            selected_concerns.append(
+                "Workforce Productivity")
+        if st.session_state.get('pre_kpi'):
+            selected_concerns.append(
+                "Data-Driven Decision Making")
+        if st.session_state.get(
+                'pre_quality'):
+            selected_concerns.append(
+                "Operational Quality")
+        if st.session_state.get(
+                'pre_marketing'):
+            selected_concerns.append(
+                "Customer & Marketing")
+        if st.session_state.get('pre_ops'):
+            selected_concerns.append(
+                "Supply Chain & Operations")
+        if st.session_state.get(
+                'pre_finance'):
+            selected_concerns.append(
+                "Financial Performance")
+
+        # Build data summary for AI
+        col_names = list(df.columns)
+        n_rows = len(df)
+        n_cols = len(df.columns)
+        null_pct = round(
+            df.isnull().sum().sum() /
+            (n_rows * n_cols) * 100, 1)
+
+        # Check for date columns
+        has_dates = any(
+            'date' in c.lower() or
+            'time' in c.lower()
+            for c in col_names)
+
+        # Primary sector from Step 0A
+        sector_val = st.session_state.get(
+            'primary_sector_0a', 'Unknown')
+        subsector_val = st.session_state.get(
+            'sub_sector_0a', 'Unknown')
+
+        if st.button(
+            "🔍 Run Data Sufficiency Check",
+            key="run_a1",
+            use_container_width=True):
+
+            with st.spinner(
+                "🤖 AI checking data "
+                "alignment..."):
+                try:
+                    api_key = os.environ.get(
+                        "ANTHROPIC_API_KEY","")
+                    client = (
+                        anthropic.Anthropic(
+                        api_key=api_key))
+
+                    concerns_str = (
+                        ", ".join(
+                        selected_concerns)
+                        if selected_concerns
+                        else "Not specified")
+
+                    prompt = (
+                        "You are DXPO AI, "
+                        "a business DX "
+                        "diagnostic tool.\n\n"
+                        "A company has "
+                        "declared:\n"
+                        "- Business Sector: "
+                        + sector_val + "\n"
+                        "- Sub-sector: "
+                        + subsector_val + "\n"
+                        "- Business "
+                        "Challenges: "
+                        + concerns_str + "\n\n"
+                        "They submitted data "
+                        "with:\n"
+                        "- Rows: " +
+                        str(n_rows) + "\n"
+                        "- Columns: " +
+                        str(col_names) + "\n"
+                        "- Missing data: " +
+                        str(null_pct) + "%\n"
+                        "- Has date/time "
+                        "columns: " +
+                        str(has_dates) + "\n\n"
+                        "Score the data "
+                        "sufficiency from "
+                        "0-5 where:\n"
+                        "5 = Excellent fit "
+                        "for declared sector "
+                        "& challenges\n"
+                        "4 = Good fit, minor "
+                        "gaps\n"
+                        "3 = Adequate, some "
+                        "limitations\n"
+                        "2 = Limited, "
+                        "significant gaps\n"
+                        "1 = Poor fit\n"
+                        "0 = Not suitable / "
+                        "wrong data type\n\n"
+                        "Reply in this exact "
+                        "format:\n"
+                        "SCORE: [0-5]\n"
+                        "VERDICT: [one line]\n"
+                        "STRENGTHS: [one line]\n"
+                        "GAPS: [one line]\n"
+                        "SUGGESTION: [one "
+                        "line — what data "
+                        "would improve this]")
+
+                    msg = (
+                        client.messages
+                        .create(
+                        model=
+                        "claude-opus-4-5",
+                        max_tokens=300,
+                        messages=[{
+                            "role": "user",
+                            "content": prompt
+                        }]))
+
+                    result = (
+                        msg.content[0]
+                        .text.strip())
+
+                    # Parse score
+                    score = 0
+                    for line in (
+                            result.split('\n')):
+                        if line.startswith(
+                                'SCORE:'):
+                            try:
+                                score = int(
+                                    line
+                                    .split(':')[1]
+                                    .strip())
+                            except Exception:
+                                score = 0
+
+                    # Display result
+                    score_color = (
+                        "#2ECC71" if score >= 4
+                        else "#F39C12"
+                        if score >= 2
+                        else "#E74C3C")
+                    score_emoji = (
+                        "🟢" if score >= 4
+                        else "🟡" if score >= 2
+                        else "🔴")
+
+                    st.markdown(
+                        f'<div style="'
+                        f'background:{score_color}20;'
+                        f'border-left:5px solid '
+                        f'{score_color};'
+                        f'padding:15px;'
+                        f'border-radius:8px;'
+                        f'margin:10px 0;">'
+                        f'<h2 style="color:'
+                        f'{score_color};">'
+                        f'{score_emoji} '
+                        f'Data Sufficiency: '
+                        f'{score}/5</h2>'
+                        f'</div>',
+                        unsafe_allow_html=True)
+
+                    # Show parsed details
+                    for line in (
+                            result.split('\n')):
+                        if line.startswith(
+                                'VERDICT:'):
+                            st.info(
+                                "📋 **Verdict:** "
+                                + line.replace(
+                                'VERDICT:','')
+                                .strip())
+                        elif line.startswith(
+                                'STRENGTHS:'):
+                            st.success(
+                                "✅ **Strengths:**"
+                                " " + line
+                                .replace(
+                                'STRENGTHS:','')
+                                .strip())
+                        elif line.startswith(
+                                'GAPS:'):
+                            st.warning(
+                                "⚠️ **Gaps:** "
+                                + line.replace(
+                                'GAPS:','')
+                                .strip())
+                        elif line.startswith(
+                                'SUGGESTION:'):
+                            st.markdown(
+                                "💡 **To improve"
+                                " your score:** "
+                                + line.replace(
+                                'SUGGESTION:',
+                                '').strip())
+
+                    # No data path
+                    if score == 0:
+                        st.error(
+                            "🚫 The submitted "
+                            "data does not "
+                            "match your "
+                            "declared sector. "
+                            "Here are 5 types "
+                            "of data that would"
+                            " help:")
+                        # Ask Claude for
+                        # data suggestions
+                        try:
+                            sugg_msg = (
+                                client.messages
+                                .create(
+                                model=
+                                "claude-opus-4-5",
+                                max_tokens=200,
+                                messages=[{
+                                    "role":
+                                    "user",
+                                    "content":
+                                    "For a " +
+                                    sector_val +
+                                    " company "
+                                    "focused on "
+                                    + concerns_str
+                                    + ", list "
+                                    "exactly 5 "
+                                    "types of "
+                                    "data files "
+                                    "they should "
+                                    "collect for "
+                                    "a DX "
+                                    "diagnostic. "
+                                    "Number them "
+                                    "1-5, one "
+                                    "per line, "
+                                    "keep each "
+                                    "under 10 "
+                                    "words."}]))
+                            st.markdown(
+                                sugg_msg
+                                .content[0]
+                                .text)
+                        except Exception:
+                            pass
+
+                    st.session_state[
+                        'a1_score'] = score
+
+                except Exception as e:
+                    st.warning(
+                        "Could not run "
+                        "sufficiency check: "
+                        + str(e))
+
+        elif st.session_state.get(
+                'a1_score') is not None:
+            prev_score = (
+                st.session_state['a1_score'])
+            score_emoji = (
+                "🟢" if prev_score >= 4
+                else "🟡" if prev_score >= 2
+                else "🔴")
+            st.info(
+                f"{score_emoji} Last Data "
+                f"Sufficiency Score: "
+                f"**{prev_score}/5** — "
+                f"click above to re-run")
+
+        st.markdown("---")
+
         # ── STEP 0: PRE-VISIT QUESTIONNAIRE ──
-        d_badge(3, "Confirm Your DX Focus Areas")
+        d_badge(3, L["d3"])
         st.caption(
             "Your challenge selections from Step 0B "
             "are shown below — adjust if needed "
@@ -934,7 +1315,7 @@ if df is not None:
 
         if proceed_to_doc:
             # ── STEP 2: DXPO BUSINESS INTERVIEW ──
-            d_badge(5, "DXPO Business Interview")
+            d_badge(5, L["d5"])
             st.caption(
                 "Tell us more about your "
                 "business context — "
@@ -1141,7 +1522,7 @@ if df is not None:
             st.markdown("---")
 
             # ── STEP 2B: OPTIONAL QUESTIONS ──
-            d_badge(6, "Optional Business Context")
+            d_badge(6, L["d6"])
             st.caption(
                 "Optional deeper context — "
                 "the more you answer, the "
@@ -1305,17 +1686,14 @@ if df is not None:
             # ── STEP 3: RUN ANALYSIS ──
             if concern_marketing:
                 if st.button(
-                    "🔬 Run Customer & Marketing Analysis + "
-                    "Generate DXPO Report!!",
+                    L["btn_mkt"],
                     type="primary",
                     use_container_width=True):
                     st.session_state.run_analysis = True
 
             if proceed_to_ops:
                 if st.button(
-                    "🏭 Run Operations & Quality "
-                    "Dokku + Generate DXPO "
-                    "Report!!",
+                    L["btn_ops"],
                     type="primary",
                     use_container_width=True):
                     st.session_state.run_ops_analysis = True
@@ -1591,7 +1969,7 @@ if df is not None:
 
                     # ── SHOW RESULTS ──
                     st.markdown("---")
-                    a_badge(2, "Customer & Marketing Analysis Results")
+                    a_badge(2, L["a2_mkt"])
 
                     red_pts = [p for p in
                         pain_points
@@ -2069,7 +2447,7 @@ if df is not None:
                     st.markdown("---")
 
                     # ── IMPACT EVALUATION ──
-                    a_badge(4, "DXPO Impact Evaluation")
+                    a_badge(4, L["a4"])
                     st.caption(
                         "Figure 4 · "
                         "Dr. Jay Rajasekera · "
@@ -2206,7 +2584,7 @@ if df is not None:
                     st.markdown("---")
 
                     # ── CLAUDE REPORT ──
-                    a_badge(6, "DXPO AI Report")
+                    a_badge(6, L["a6"])
                     if company_name:
                         st.markdown(
                             '<h3 style="color:#1F4E79;">📋 Personalised for: ' + str(company_name) + '</h3>',
@@ -2488,7 +2866,7 @@ if df is not None:
 
                     # ── SHOW RESULTS ──
                     st.markdown("---")
-                    a_badge(2, "Operations & Quality Analysis Results")
+                    a_badge(2, L["a2_ops"])
 
                     red_o = [p for p in
                         ops_pain_points
@@ -2813,7 +3191,7 @@ if df is not None:
                     st.markdown("---")
 
                     # ── OPS STEP 4: IMPACT ──
-                    a_badge(4, "DXPO Impact Evaluation")
+                    a_badge(4, L["a4"])
                     st.caption(
                         "Figure 4 · "
                         "Dr. Jay Rajasekera · "
@@ -2996,7 +3374,7 @@ if df is not None:
                     st.markdown("---")
 
                     # ── OPS STEP 5: REPORT ──
-                    a_badge(6, "DXPO AI Report")
+                    a_badge(6, L["a6"])
                     if company_name:
                         st.markdown(
                             '<h3 style="color:#1F4E79;">📋 Personalised for: ' + str(company_name) + '</h3>',
