@@ -321,7 +321,7 @@ elif concern_marketing_pre and (
 st.markdown("---")
 
 # ── STEP 0C: UPLOAD YOUR DATA ──
-d_badge(4, L["d4"])
+d_badge(3, L["d3"])
 st.caption(
     "Submit up to 3 business data files "
     "(Excel or CSV). DXPO MB will "
@@ -329,7 +329,133 @@ st.caption(
 
 MAX_FILES = 3
 
+@st.cache_data
 def detect_file_type(df):
+    """Auto-detect which Dokku module a
+    dataframe belongs to based on column
+    fingerprints. Returns a category string."""
+    cols = " ".join(
+        c.lower() for c in df.columns)
+    if any(k in cols for k in [
+        'total-amt','amount','revenue',
+        'spend','price','unit-price',
+        'customer','status','channel',
+        'payment']):
+        return "Customer & Marketing Strategies"
+    if any(k in cols for k in [
+        'defect','downtime','machine',
+        'units-produced','maintenance',
+        'operating-temp','product-code']):
+        return "Operations / Quality"
+    if any(k in cols for k in [
+        'employee','headcount','salary',
+        'attendance','performance',
+        'department','hire-date']):
+        return "HR / Workforce"
+    if any(k in cols for k in [
+        'budget','profit','expense',
+        'cost','invoice','ledger']):
+        return "Finance"
+    return "Unknown — please select below"
+
+@st.cache_data
+def load_excel_file(file_bytes, sheet_name):
+    """Cache Excel file loading — avoids
+    re-reading on every Streamlit rerun.
+    Key speedup for large files like
+    100,000-row e-commerce datasets."""
+    import io
+    return pd.read_excel(
+        io.BytesIO(file_bytes),
+        sheet_name=sheet_name)
+
+@st.cache_data
+def load_csv_file(file_bytes):
+    """Cache CSV file loading."""
+    import io
+    return pd.read_csv(
+        io.BytesIO(file_bytes))
+
+@st.cache_data
+def get_excel_sheets(file_bytes):
+    """Cache sheet name detection."""
+    import io
+    xl = pd.ExcelFile(
+        io.BytesIO(file_bytes))
+    return xl.sheet_names
+
+@st.cache_data
+def compute_marketing_stats(
+        df_json, amt_col, status_col_name):
+    """Cache heavy Marketing Dokku
+    computations — biggest speedup
+    for 100k row datasets. Called once,
+    reused on every rerun until data
+    changes."""
+    df = pd.read_json(df_json,
+                      orient='split')
+    results = {}
+
+    # Customer counts
+    results['n'] = len(df)
+
+    # Status / retention
+    if status_col_name and (
+            status_col_name in df.columns):
+        inactive = (
+            df[df[status_col_name]
+               == 'Inactive']
+            [status_col_name].count())
+        active = results['n'] - inactive
+        results['inactive'] = inactive
+        results['active'] = active
+        results['inactive_pct'] = round(
+            inactive / results['n'] * 100, 1)
+        # Spend gap
+        if amt_col in df.columns:
+            act_spend = df[
+                df[status_col_name]
+                == 'Active'][amt_col].mean()
+            ina_spend = df[
+                df[status_col_name]
+                == 'Inactive'][amt_col].mean()
+            results['act_spend'] = act_spend
+            results['ina_spend'] = ina_spend
+            results['spend_gap'] = (
+                act_spend - ina_spend)
+
+    # Revenue by product (for Pareto)
+    prod_col = next(
+        (c for c in df.columns
+         if 'Product' in c or
+         'product' in c.lower()), None)
+    if prod_col and amt_col in df.columns:
+        by_prod = (
+            df.groupby(prod_col)[amt_col]
+            .sum()
+            .sort_values(ascending=False))
+        results['revenue_by_product'] = (
+            by_prod.to_dict())
+        results['total_revenue'] = (
+            by_prod.sum())
+
+    # Internet/channel %
+    internet_col = next(
+        (c for c in df.columns
+         if 'channel' in c.lower() or
+         'internet' in c.lower() or
+         'online' in c.lower()), None)
+    if internet_col:
+        online_pct = (
+            df[internet_col]
+            .str.lower()
+            .isin(['online', 'internet',
+                   'web', 'digital'])
+            .mean() * 100)
+        results['online_pct'] = round(
+            online_pct, 1)
+
+    return results
     """Auto-detect which Dokku module a
     dataframe belongs to based on column
     fingerprints. Returns a category string."""
@@ -395,11 +521,19 @@ if uploaded_files:
 
     for fi, uf in enumerate(uploaded_files):
         try:
+            # Read file bytes once —
+            # cached functions use bytes
+            # as cache key so same file
+            # never re-read on rerun
+            file_bytes = uf.read()
+            uf.seek(0)  # reset for safety
+
             if uf.name.endswith(".csv"):
-                raw_df = pd.read_csv(uf)
+                raw_df = load_csv_file(
+                    file_bytes)
             else:
-                xl = pd.ExcelFile(uf)
-                sheets = xl.sheet_names
+                sheets = get_excel_sheets(
+                    file_bytes)
                 if len(sheets) > 1:
                     sheet = st.selectbox(
                         f"Sheet for "
@@ -408,9 +542,8 @@ if uploaded_files:
                         key=f"sheet_{fi}")
                 else:
                     sheet = sheets[0]
-                raw_df = pd.read_excel(
-                    uf,
-                    sheet_name=sheet)
+                raw_df = load_excel_file(
+                    file_bytes, sheet)
 
             detected = detect_file_type(raw_df)
 
@@ -914,7 +1047,7 @@ if df is not None:
         st.markdown("---")
 
         # ── STEP 0: PRE-VISIT QUESTIONNAIRE ──
-        d_badge(3, L["d3"])
+        d_badge(4, L["d4"])
         st.caption(
             "Your challenge selections from Step 0B "
             "are shown below — adjust if needed "
@@ -2276,21 +2409,11 @@ if df is not None:
                         pain_points
                         if 'YELLOW' in p['flag']]
 
-                    col1,col2,col3 = st.columns(3)
-                    with col1:
-                        st.metric(
-                            "Total Pain Points",
-                            len(pain_points))
-                    with col2:
-                        st.metric(
-                            "🔴 RED Critical",
-                            len(red_pts))
-                    with col3:
-                        st.metric(
-                            "🟡 YELLOW Monitor",
-                            len(yel_pts))
+                    grn_pts_old = [p for p in
+                        pain_points
+                        if 'GREEN' in p['flag']]
 
-                    # ── OPTIONAL TRIGGERED TESTS ──
+                    # ── ADAPTIVE TRIGGERED TESTS ──
                     if opt_context:
                         opt_pain = []
 
@@ -2341,11 +2464,11 @@ if df is not None:
                         if opt_pain:
                             st.markdown("---")
                             st.markdown(
-                                "### 🔬 Optional Tests — "
-                                "Triggered by Your Answers")
+                                "### 🔬 Adaptive Tests — "
+                                "Triggered by Your Context")
                             st.caption(
                                 "These tests ran because "
-                                "of your Step 2B answers!!")
+                                "of your D6 Optional Business Context answers!!")
 
                             for p in opt_pain:
                                 if "RED" in p["flag"]:
@@ -2535,8 +2658,66 @@ if df is not None:
                                     "precise measurement.")
 
                     # ── COMPLETE RESULTS TABLE ──
-                    st.markdown("### 📊 Customer & Marketing — Complete Test Results")
-                    st.caption("All tests run · Standard + Adaptive · Based on YOUR interview!!")
+                    st.markdown("---")
+                    a_badge(3, "Pain Points Summary")
+
+                    # Full list — ALL findings
+                    # (Red, Yellow, Green)
+                    # Comment 4 fix: show ALL,
+                    # not just counts
+                    grn_pts = [p for p in
+                        pain_points
+                        if 'GREEN' in p['flag']]
+
+                    col1,col2,col3,col4 = (
+                        st.columns(4))
+                    with col1:
+                        st.metric(
+                            "Total Findings",
+                            len(pain_points))
+                    with col2:
+                        st.metric(
+                            "🔴 Critical",
+                            len(red_pts))
+                    with col3:
+                        st.metric(
+                            "🟡 Watch",
+                            len(yel_pts))
+                    with col4:
+                        st.metric(
+                            "🟢 Healthy",
+                            len(grn_pts))
+
+                    # Full findings list
+                    st.markdown(
+                        "**All Detected "
+                        "Findings:**")
+                    for p in sorted(
+                            pain_points,
+                            key=lambda x: (
+                            0 if 'RED' in
+                            x['flag'] else
+                            1 if 'YELLOW' in
+                            x['flag'] else 2)):
+                        icon = (
+                            "🔴" if 'RED' in
+                            p['flag'] else
+                            "🟡" if 'YELLOW'
+                            in p['flag'] else
+                            "🟢")
+                        short_finding = (
+                            p['finding'][:80]
+                            + "..."
+                            if len(p['finding'])
+                            > 80
+                            else p['finding'])
+                        st.markdown(
+                            f"{icon} **"
+                            f"{p['test']}** — "
+                            f"{short_finding}")
+
+                    st.markdown("---")
+                    a_badge(3, "Customer & Marketing — Complete Test Results")
 
                     # Build complete test results
                     all_tests = [
@@ -2852,6 +3033,9 @@ if df is not None:
                                     size=12),
                                 align='center',
                                 height=38))])
+
+                    st.markdown("---")
+                    a_badge(5, "DXPO Impact Table")
 
                     fig2.update_layout(
                         title=dict(
@@ -3738,6 +3922,9 @@ if df is not None:
                                 size=12),
                             align='center',
                             height=38))])
+
+                    st.markdown("---")
+                    a_badge(5, "DXPO Impact Table")
 
                     ofig2.update_layout(
                         title=dict(
