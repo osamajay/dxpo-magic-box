@@ -82,7 +82,7 @@ T = {
             "Analysis + Generate DXPO "
             "Report!!",
         "report_title":
-            L["report_title"],
+            "DXPO AI Diagnostic Report",
         "toggle_label": "🇯🇵 日本語",
     },
     "JP": {
