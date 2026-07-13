@@ -56,8 +56,8 @@ T = {
             "🪄 DXPO AI — Business Pain "
             "Point Diagnostics & DX Strategy",
         "subtitle":
-            "Dr. Jay Rajasekera | "
-            "DXTICS Coorp, Tokyo",
+            "*** JRR 44-T *** | "
+            "DXTICS Corp, Tokyo",
         "d1": "Your Company Business Sector",
         "d2": "Your Business Challenges",
         "d3": "Confirm Your DX Focus Areas",
