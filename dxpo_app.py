@@ -57,7 +57,7 @@ T = {
             "Point Diagnostics & DX Strategy",
         "subtitle":
             "Dr. Jay Rajasekera | "
-            "Tokyo International University",
+            "DXTICS Coorp, Tokyo",
         "d1": "Your Company Business Sector",
         "d2": "Your Business Challenges",
         "d3": "Confirm Your DX Focus Areas",
