@@ -147,7 +147,7 @@ L = T[st.session_state['lang']]
 
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver 44-T@00:28| DXPOIT.com")
+    "Process Optimization ver 46-T@Aug 3 21:25| DXPOIT.com")
 st.markdown("---")
 
 # ══════════════════════════════════════════
