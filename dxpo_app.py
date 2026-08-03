@@ -56,7 +56,7 @@ T = {
             "🪄 DXPO AI — Business Pain "
             "Point Diagnostics & DX Strategy",
         "subtitle":
-            "*** JRR 44-T *** | "
+            "*** JRR 46-T Aug 3, 2026*** | "
             "DXTICS Corp, Tokyo",
         "d1": "Your Company Business Sector",
         "d2": "Your Business Challenges",
@@ -1490,52 +1490,272 @@ if df is not None:
                         in industry_0a else
                         "🔧 Other"))
 
-                # Q2 — adaptive based on
-                # concern selections
+                # ── SECTOR-AWARE TAXONOMY ──
+                # Q2/Q3 options driven by D1
+                # primary_sector AND D2 concern
+                # selections — the Value Chain！
+
+                sector_concerns = {
+                    "Manufacturing": {
+                        "concerns": [
+                            "⚠️ Defect rate too high",
+                            "⏱️ Machine downtime excessive",
+                            "🔧 Production bottlenecks",
+                            "📋 Quality control gaps",
+                            "🔩 Maintenance & equipment issues",
+                            "⚡ Energy efficiency losses",
+                            "📦 Inventory waste / excess stock",
+                            "🔄 Process inefficiency / rework",
+                            "🏭 Low production yield",
+                            "🌡️ Environmental / safety compliance"],
+                        "depts": [
+                            "🏭 Production / Manufacturing",
+                            "🔍 Quality Control / QA",
+                            "🔧 Maintenance / Engineering",
+                            "📦 Inventory / Warehouse",
+                            "⚙️ Process / Industrial Eng.",
+                            "🌡️ HSE / Safety",
+                            "🏢 All equally"]
+                    },
+                    "Trading": {
+                        "concerns": [
+                            "📉 Revenue declining",
+                            "👥 Losing customers / churn",
+                            "🌐 Low online sales / digital gap",
+                            "💰 Pricing strategy not optimized",
+                            "📢 Marketing spend not converting",
+                            "🔁 Low repeat purchase / loyalty",
+                            "🆕 High new customer acquisition cost",
+                            "📦 Inventory — overstock or stockout",
+                            "🤝 Supplier reliability issues",
+                            "💸 Purchase costs too high"],
+                        "depts": [
+                            "📊 Sales & Marketing",
+                            "🛒 Purchasing / Procurement",
+                            "📦 Inventory / Merchandising",
+                            "🤝 Customer Service",
+                            "💹 Finance",
+                            "🏢 All equally"]
+                    },
+                    "Services": {
+                        "concerns": [
+                            "⏱️ Customer wait times too long",
+                            "📉 Service quality gaps",
+                            "👥 Staff productivity low",
+                            "💸 Cost per service too high",
+                            "😞 Customer satisfaction declining",
+                            "🔄 Process automation gaps",
+                            "🔁 Low customer retention",
+                            "📋 Compliance / regulatory issues",
+                            "🌐 Weak digital service delivery",
+                            "📊 No visibility into KPIs"],
+                        "depts": [
+                            "🤝 Customer Service / Front Office",
+                            "⚙️ Operations",
+                            "👥 HR / People",
+                            "💹 Finance",
+                            "🌐 Digital / IT",
+                            "📋 Compliance",
+                            "🏢 All equally"]
+                    },
+                    "Technology": {
+                        "concerns": [
+                            "📉 Customer churn increasing",
+                            "📱 Low feature adoption / engagement",
+                            "💸 Infrastructure costs too high",
+                            "🐢 Development speed too slow",
+                            "🔒 Security vulnerabilities",
+                            "📈 Scaling challenges",
+                            "🐛 High bug rate / poor quality",
+                            "🆕 Slow time-to-market",
+                            "📊 Poor product analytics",
+                            "🤝 Low B2B sales conversion"],
+                        "depts": [
+                            "💻 Engineering / Development",
+                            "📊 Product Management",
+                            "🤝 Sales / Customer Success",
+                            "🔒 Security / DevOps",
+                            "💹 Finance / Unit Economics",
+                            "🏢 All equally"]
+                    },
+                    "Finance": {
+                        "concerns": [
+                            "⚖️ Risk management gaps",
+                            "📋 Compliance costs too high",
+                            "🆕 Customer acquisition challenges",
+                            "🔍 Fraud detection insufficient",
+                            "⚙️ Operational inefficiency",
+                            "🌐 Low digital adoption by customers",
+                            "📉 Portfolio performance declining",
+                            "💸 Cost control insufficient",
+                            "📊 Poor reporting / analytics",
+                            "🔄 Manual processes / no automation"],
+                        "depts": [
+                            "🏦 Retail Banking / Front Office",
+                            "⚖️ Risk & Compliance",
+                            "💹 Finance / Treasury",
+                            "🌐 Digital / Fintech",
+                            "🔍 Fraud / AML",
+                            "🤝 Customer Relations",
+                            "🏢 All equally"]
+                    },
+                    "Energy": {
+                        "concerns": [
+                            "⚙️ Equipment downtime / failures",
+                            "⚡ Energy waste / efficiency loss",
+                            "🔧 Maintenance costs too high",
+                            "🌡️ Safety incidents / HSE",
+                            "📋 Regulatory compliance gaps",
+                            "📈 Demand forecasting inaccurate",
+                            "🌿 Carbon / sustainability targets",
+                            "📊 Asset performance visibility",
+                            "💸 Fuel / input cost volatility",
+                            "🔄 Grid / supply reliability"],
+                        "depts": [
+                            "⚙️ Operations / Plant",
+                            "🔧 Maintenance / Engineering",
+                            "🌡️ HSE / Safety",
+                            "📋 Regulatory / Compliance",
+                            "📊 Asset Management",
+                            "🌿 Sustainability",
+                            "🏢 All equally"]
+                    },
+                    "Agriculture": {
+                        "concerns": [
+                            "🌾 Yield efficiency low",
+                            "🔍 Quality control issues",
+                            "🚚 Supply chain delays",
+                            "♻️ Waste / post-harvest losses",
+                            "🌍 Market access challenges",
+                            "💸 Input costs too high",
+                            "🌦️ Weather / climate risk",
+                            "📋 Food safety compliance",
+                            "🤝 Supplier / farmer relations",
+                            "📊 No data on farm performance"],
+                        "depts": [
+                            "🌾 Farming / Production",
+                            "🔍 Quality / Food Safety",
+                            "🚚 Supply Chain / Logistics",
+                            "💹 Finance / Procurement",
+                            "🌍 Sales / Distribution",
+                            "🏢 All equally"]
+                    },
+                    "Logistics": {
+                        "concerns": [
+                            "🚚 Delivery delays / late shipments",
+                            "🚛 Fleet efficiency low",
+                            "🏪 Warehouse optimization needed",
+                            "💸 Cost per shipment too high",
+                            "🗺️ Route planning inefficient",
+                            "😞 Customer satisfaction with delivery",
+                            "📦 Inventory accuracy issues",
+                            "🔄 Returns management complexity",
+                            "📊 Poor shipment visibility",
+                            "🌍 Cross-border / customs challenges"],
+                        "depts": [
+                            "🚚 Fleet / Transport",
+                            "🏪 Warehouse / Fulfilment",
+                            "🗺️ Route Planning / Dispatch",
+                            "🤝 Customer Service",
+                            "💹 Finance / Cost Control",
+                            "📊 Analytics / IT",
+                            "🏢 All equally"]
+                    },
+                }
+
+                default_concerns = [
+                    "📉 Revenue / performance declining",
+                    "💸 Costs too high",
+                    "👥 People / talent issues",
+                    "📊 No data visibility / poor KPIs",
+                    "⚙️ Process inefficiency",
+                    "🌐 Digital maturity gap",
+                    "📋 Compliance / regulatory risk",
+                    "🔄 Lack of automation",
+                    "🤝 Customer satisfaction issues",
+                    "🆕 Innovation / growth challenges"]
+
+                default_depts = [
+                    "📊 Strategy / Management",
+                    "👥 HR / People",
+                    "💹 Finance",
+                    "⚙️ Operations",
+                    "🌐 IT / Digital",
+                    "🤝 Customer-facing",
+                    "🏢 All equally"]
+
+                def get_sector_key(sector):
+                    if "Manufactur" in sector:
+                        return "Manufacturing"
+                    elif any(k in sector for k in
+                            ["Trading","Commerce",
+                             "Retail","E-Commerce",
+                             "Wholesale"]):
+                        return "Trading"
+                    elif any(k in sector for k in
+                            ["Service","Hospital",
+                             "Health","Education",
+                             "Hospitality"]):
+                        return "Services"
+                    elif any(k in sector for k in
+                            ["Tech","ICT","SaaS",
+                             "Software","Cloud",
+                             "Cyber"]):
+                        return "Technology"
+                    elif any(k in sector for k in
+                            ["Finance","Bank",
+                             "Insur","Fintech",
+                             "Asset"]):
+                        return "Finance"
+                    elif any(k in sector for k in
+                            ["Energy","Util",
+                             "Oil","Gas",
+                             "Renew","Power"]):
+                        return "Energy"
+                    elif any(k in sector for k in
+                            ["Agri","Food",
+                             "Farm","Fisher"]):
+                        return "Agriculture"
+                    elif any(k in sector for k in
+                            ["Logist","Transport",
+                             "Freight","Warehouse",
+                             "Port"]):
+                        return "Logistics"
+                    return None
+
+                sector_key = get_sector_key(
+                    primary_sector)
+                taxonomy = sector_concerns.get(
+                    sector_key, {})
+
                 is_ops_concern = (
                     concern_quality or
                     concern_ops)
                 is_mkt_concern = (
                     concern_marketing)
 
-                if is_ops_concern and not (
-                        is_mkt_concern):
-                    concern_opts = [
-                        "⚠️ Defect rate too high",
-                        "⏱️ Machine downtime "
-                        "excessive",
-                        "🔧 Process bottlenecks",
-                        "📋 Quality control gaps",
-                        "🚚 Supply chain delays",
-                        "🔩 Maintenance issues"]
-                elif is_mkt_concern and not (
-                        is_ops_concern):
-                    concern_opts = [
-                        "📉 Revenue declining",
-                        "💸 Costs too high",
-                        "👥 Losing customers/"
-                        "churn",
-                        "⏱️ Processes too slow",
-                        "🔍 Cannot identify "
-                        "best customers",
-                        "📢 Marketing not "
-                        "effective"]
+                if taxonomy:
+                    concern_opts = (
+                        taxonomy["concerns"])
+                    dept_opts = (
+                        taxonomy["depts"])
                 else:
-                    # Both or neither —
-                    # show combined list
-                    concern_opts = [
-                        "📉 Revenue declining",
-                        "⚠️ Defect rate too high",
-                        "💸 Costs too high",
-                        "👥 Losing customers/"
-                        "churn",
-                        "⏱️ Machine downtime "
-                        "excessive",
-                        "🔧 Process bottlenecks",
-                        "🔍 Cannot identify "
-                        "best customers",
-                        "📢 Marketing not "
-                        "effective"]
+                    concern_opts = (
+                        default_concerns)
+                    dept_opts = default_depts
+
+                if sector_key:
+                    st.caption(
+                        f"💡 Q2 & Q3 options "
+                        f"tailored for: "
+                        f"**{primary_sector}"
+                        f" → {sub_sector}**")
+                else:
+                    st.caption(
+                        "💡 Select your "
+                        "Primary Sector in "
+                        "D1 for tailored "
+                        "Q2 & Q3 options")
 
                 concern_primary = st.selectbox(
                     "Q2: PRIMARY concern:",
@@ -1546,38 +1766,6 @@ if df is not None:
                     ["None"] + concern_opts)
 
             with col2:
-                # Q3 — adaptive based on
-                # concern selections
-                if is_ops_concern and not (
-                        is_mkt_concern):
-                    dept_opts = [
-                        "🏭 Production / "
-                        "Manufacturing",
-                        "🔍 Quality Control",
-                        "🔧 Maintenance",
-                        "🚚 Supply Chain",
-                        "🏢 All equally"]
-                elif is_mkt_concern and not (
-                        is_ops_concern):
-                    dept_opts = [
-                        "📊 Sales & Marketing",
-                        "⚙️ Operations",
-                        "💹 Finance & Cost "
-                        "Control",
-                        "🤝 Customer Service",
-                        "🏢 All equally"]
-                else:
-                    dept_opts = [
-                        "📊 Sales & Marketing",
-                        "🏭 Production / "
-                        "Manufacturing",
-                        "🔍 Quality Control",
-                        "⚙️ Operations",
-                        "💹 Finance & Cost "
-                        "Control",
-                        "🤝 Customer Service",
-                        "🏢 All equally"]
-
                 dept_primary = st.selectbox(
                     "Q3: PRIMARY department:",
                     dept_opts)
