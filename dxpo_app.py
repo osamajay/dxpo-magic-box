@@ -7,6 +7,13 @@ import os
 import warnings
 warnings.filterwarnings("ignore")
 
+# ── CLAUDE MODEL TIERS ──
+# One place to change models. Short
+# classification calls use FAST; report
+# and analysis generation uses SMART.
+MODEL_FAST = "claude-haiku-4-5-20251001"
+MODEL_SMART = "claude-sonnet-5"
+
 
 def d_badge(num, label):
     """Blue Data Input badge header"""
@@ -56,7 +63,7 @@ T = {
             "🪄 DXPO AI — Business Pain "
             "Point Diagnostics & DX Strategy",
         "subtitle":
-            "*** JRR 46-T Aug 3, 2026*** | "
+            "*** JRR 48-T Aug 4, 2026*** | "
             "DXTICS Corp, Tokyo",
         "d1": "Your Company Business Sector",
         "d2": "Your Business Challenges",
@@ -147,7 +154,7 @@ L = T[st.session_state['lang']]
 
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver 47-AI@D2 | DXPOIT.com")
+    "Process Optimization ver 48-Cards | DXPOIT.com")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -196,6 +203,7 @@ sector_taxonomy = {
         "Other Technology"],
     "💰 Finance & Insurance": [
         "Banking (Retail & Investment)",
+        "Cards & Payments (Issuing / Acquiring)",
         "Fintech (Financial Technology)",
         "Insurance",
         "Asset Management / Investing",
@@ -1029,7 +1037,7 @@ if df is not None:
                         client.messages
                         .create(
                         model=
-                        "claude-opus-4-5",
+                        MODEL_FAST,
                         max_tokens=300,
                         messages=[{
                             "role": "user",
@@ -1132,7 +1140,7 @@ if df is not None:
                                 client.messages
                                 .create(
                                 model=
-                                "claude-opus-4-5",
+                                MODEL_FAST,
                                 max_tokens=200,
                                 messages=[{
                                     "role":
@@ -1337,7 +1345,7 @@ if df is not None:
                     "exactly as written "
                     "above, nothing else.")
                 msg = client.messages.create(
-                    model="claude-opus-4-5",
+                    model=MODEL_SMART,
                     max_tokens=100,
                     messages=[{
                         "role": "user",
@@ -1732,13 +1740,19 @@ if df is not None:
                             "📉 Portfolio performance declining",
                             "💸 Cost control insufficient",
                             "📊 Poor reporting / analytics",
-                            "🔄 Manual processes / no automation"],
+                            "🔄 Manual processes / no automation",
+                            "🔁 Cardholder churn / dormant accounts",
+                            "💳 Low spend per active cardholder",
+                            "🎯 Cross-sell / up-sell not working",
+                            "🏪 Merchant category share declining"],
                         "depts": [
                             "🏦 Retail Banking / Front Office",
                             "⚖️ Risk & Compliance",
                             "💹 Finance / Treasury",
                             "🌐 Digital / Fintech",
                             "🔍 Fraud / AML",
+                            "💳 Cards / Payments",
+                            "📊 Portfolio Analytics / CRM",
                             "🤝 Customer Relations",
                             "🏢 All equally"]
                     },
@@ -2694,8 +2708,7 @@ if df is not None:
                                         .messages
                                         .create(
                                         model=
-                                        "claude-"
-                                        "opus-4-5",
+                                        MODEL_FAST,
                                         max_tokens=
                                         200,
                                         messages=[{
@@ -3510,7 +3523,7 @@ if df is not None:
                             api_key=api_key)
                         message = (
                             client.messages.create(
-                            model="claude-opus-4-5",
+                            model=MODEL_SMART,
                             max_tokens=1500,
                             messages=[{
                                 "role":"user",
@@ -4354,7 +4367,7 @@ if df is not None:
                             client.messages
                             .create(
                             model=
-                            "claude-opus-4-5",
+                            MODEL_SMART,
                             max_tokens=1500,
                             messages=[{
                                 "role":
