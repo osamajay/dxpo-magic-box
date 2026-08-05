@@ -147,7 +147,7 @@ L = T[st.session_state['lang']]
 
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver 46-T@Aug 3 21:25| DXPOIT.com")
+    "Process Optimization ver 47-AI@D2 | DXPOIT.com")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -271,6 +271,149 @@ st.caption(
 st.markdown(
     "Select the area(s) you're most "
     "concerned about:")
+
+# ══════════════════════════════════════════
+# D2 INTELLIGENT LAYER  —  PASTE AT LINE 270
+# (after the "Select the area(s)…" markdown,
+#  BEFORE  col_0b1, col_0b2 = st.columns(2))
+#
+# Nothing below line 275 changes. The six
+# pre_* checkboxes stay exactly as they are —
+# they still gate proceed_to_doc and all of
+# D5. This layer only PRE-TICKS them.
+# ══════════════════════════════════════════
+
+# Map every AI suggestion onto one of your
+# six existing modules. This is what keeps
+# the 4,316 lines downstream untouched.
+D2_MODULE_KEYS = {
+    "workforce":  "pre_hr",
+    "data":       "pre_kpi",
+    "quality":    "pre_quality",
+    "marketing":  "pre_marketing",
+    "operations": "pre_ops",
+    "finance":    "pre_finance",
+}
+
+D2_SYS = (
+    "You are a senior consultant running a "
+    "corporate diagnostic modelled on Japan's "
+    "ningen dock (人間ドック) health checkup. "
+    "Given a company's sector and sub-sector, "
+    "name the challenges firms of that exact "
+    "profile most commonly have. Be concrete: "
+    "'days of inventory on slow-moving SKUs' "
+    "is useful, 'inefficiency' is not. Prefer "
+    "challenges that leave a trace in ordinary "
+    "company data.\n"
+    "Return ONLY a JSON array, no prose, no "
+    "markdown fences. Each element:\n"
+    '{"challenge":"<8-14 words, the pain the '
+    'client feels>","module":"<one of: '
+    'workforce|data|quality|marketing|'
+    'operations|finance>","signal":"<the '
+    'metric that would evidence it>",'
+    '"severity":"<high|medium|low>"}\n'
+    "Order by how common the challenge is, "
+    "most common first."
+)
+
+
+@st.cache_data(ttl=60 * 60 * 24 * 7,
+               show_spinner=False)
+def d2_ai_suggest(sector, subsector, n=6):
+    """Cached per sector pair — a 50-person
+    workshop on one sector costs 1 API call."""
+    import json
+    client = anthropic.Anthropic(
+        api_key=st.secrets["ANTHROPIC_API_KEY"])
+    msg = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=1200,
+        system=D2_SYS,
+        messages=[
+            {"role": "user",
+             "content": (
+                 f"Primary sector: {sector}\n"
+                 f"Sub-sector: {subsector}\n"
+                 f"Market: Japan\n"
+                 f"Give exactly {n} challenges.")},
+            {"role": "assistant", "content": "["},
+        ])
+    raw = "[" + "".join(
+        b.text for b in msg.content
+        if b.type == "text")
+    out = json.loads(
+        raw[raw.find("["):raw.rfind("]") + 1])
+    return [d for d in out
+            if d.get("challenge")
+            and d.get("module") in D2_MODULE_KEYS][:n]
+
+
+with st.expander(
+        "🤖 Let DXPO AI suggest challenges "
+        "typical for your sector",
+        expanded=False):
+
+    st.caption(
+        f"Based on D1: **{primary_sector}** → "
+        f"**{sub_sector}**. Tick what sounds "
+        "familiar — the matching diagnostic "
+        "module below will switch on "
+        "automatically.")
+
+    if st.button("🔍 Suggest challenges",
+                 key="d2_ai_go"):
+        st.session_state["d2_ai_run"] = True
+
+    if st.session_state.get("d2_ai_run"):
+        try:
+            with st.spinner(
+                    "Reviewing typical pain "
+                    "points in this sector…"):
+                sugg = d2_ai_suggest(
+                    primary_sector, sub_sector)
+            st.session_state["d2_ai_error"] = None
+        except Exception as e:
+            sugg = []
+            st.session_state["d2_ai_error"] = str(e)
+
+        if st.session_state.get("d2_ai_error"):
+            st.warning(
+                "⚠️ AI suggestions unavailable "
+                "right now — please use the "
+                "checkboxes below as usual.")
+            with st.expander("Details"):
+                st.code(
+                    st.session_state["d2_ai_error"])
+
+        dot = {"high": "🔴", "medium": "🟠",
+               "low": "🟡"}
+        picked = []
+        for i, s in enumerate(sugg):
+            mark = dot.get(
+                str(s.get("severity", "")).lower(),
+                "⚪")
+            if st.checkbox(
+                    f"{mark} {s['challenge']}",
+                    key=f"d2_ai_{i}"):
+                # pre-tick the load-bearing box
+                st.session_state[
+                    D2_MODULE_KEYS[s["module"]]
+                ] = True
+                picked.append(s)
+            if s.get("signal"):
+                st.caption(
+                    f"　📈 Signal to test: "
+                    f"*{s['signal']}*")
+
+        st.session_state[
+            "d2_ai_selected"] = picked
+        if picked:
+            st.success(
+                f"✅ {len(picked)} challenge(s) "
+                "carried forward — matching "
+                "modules activated below.")
 
 col_0b1, col_0b2 = st.columns(2)
 with col_0b1:
