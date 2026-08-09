@@ -63,7 +63,7 @@ T = {
             "🪄 DXPO AI — Business Pain "
             "Point Diagnostics & DX Strategy",
         "subtitle":
-            "*** JRR 46-T Aug 3, 2026*** | "
+            "*** JRR 49-T Aug 9, 2026*** | "
             "DXTICS Corp, Tokyo",
         "d1": "Your Company Business Sector",
         "d2": "Your Business Challenges",
