@@ -63,7 +63,7 @@ T = {
             "🪄 DXPO AI — Business Pain "
             "Point Diagnostics & DX Strategy",
         "subtitle":
-            "*** JRR 48-T Aug 4, 2026*** | "
+            "*** JRR 46-T Aug 3, 2026*** | "
             "DXTICS Corp, Tokyo",
         "d1": "Your Company Business Sector",
         "d2": "Your Business Challenges",
@@ -154,7 +154,7 @@ L = T[st.session_state['lang']]
 
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver 48-Cards | DXPOIT.com")
+    "Process Optimization ver 49-T-Context Aug 9, 2026 | DXPOIT.com")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -263,6 +263,60 @@ elif "Agriculture" in primary_sector:
 else:
     company_type = primary_sector
 
+# ══════════════════════════════════════════
+# D1b — COMPANY IDENTITY  (moved up from D6)
+# These three sharpen every downstream AI
+# call, so they must be collected BEFORE the
+# first suggestion runs, not after.
+# ══════════════════════════════════════════
+st.markdown("**🏢 About your company** "
+            "*(optional — sharpens your "
+            "diagnostic and personalises "
+            "your report)*")
+
+col_id1, col_id2, col_id3 = st.columns(3)
+
+with col_id1:
+    company_name = st.text_input(
+        "Company Name:",
+        placeholder="e.g. ABC KK, XYZ Corp",
+        key="company_name_widget")
+    st.session_state[
+        'company_name_val'] = company_name
+
+with col_id2:
+    opt_country = st.selectbox(
+        "Country / Region:",
+        ["Not answered",
+         "🇯🇵 Japan",
+         "🌏 Southeast Asia",
+         "🌏 South Asia",
+         "🌏 East Asia",
+         "🌍 Middle East",
+         "🌐 Global"],
+        key="country_d1")
+
+with col_id3:
+    opt_size = st.selectbox(
+        "Company size:",
+        ["Not answered",
+         "SME (under 100 staff)",
+         "Mid-size (100-1000)",
+         "Large (over 1000)"],
+        key="size_d1")
+
+# Plain-text market string for AI prompts
+market_ctx = (opt_country.split(" ")[-1]
+              if opt_country != "Not answered"
+              else "Japan")
+size_ctx = (opt_size
+            if opt_size != "Not answered"
+            else "not specified")
+
+if company_name:
+    st.caption(f"✅ Report will be personalised "
+               f"for: **{company_name}**")
+
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -329,14 +383,15 @@ D2_SYS = (
 
 @st.cache_data(ttl=60 * 60 * 24 * 7,
                show_spinner=False)
-def d2_ai_suggest(sector, subsector, n=6):
+def d2_ai_suggest(sector, subsector,
+                  market, size, n=6):
     """Cached per sector pair — a 50-person
     workshop on one sector costs 1 API call."""
     import json
     client = anthropic.Anthropic(
         api_key=st.secrets["ANTHROPIC_API_KEY"])
     msg = client.messages.create(
-        model="claude-haiku-4-5-20251001",
+        model=MODEL_FAST,
         max_tokens=1200,
         system=D2_SYS,
         messages=[
@@ -344,7 +399,8 @@ def d2_ai_suggest(sector, subsector, n=6):
              "content": (
                  f"Primary sector: {sector}\n"
                  f"Sub-sector: {subsector}\n"
-                 f"Market: Japan\n"
+                 f"Market: {market}\n"
+                 f"Company size: {size}\n"
                  f"Give exactly {n} challenges.")},
             {"role": "assistant", "content": "["},
         ])
@@ -380,7 +436,8 @@ with st.expander(
                     "Reviewing typical pain "
                     "points in this sector…"):
                 sugg = d2_ai_suggest(
-                    primary_sector, sub_sector)
+                    primary_sector, sub_sector,
+                    market_ctx, size_ctx)
             st.session_state["d2_ai_error"] = None
         except Exception as e:
             sugg = []
@@ -2007,37 +2064,10 @@ if df is not None:
                 "sharper and more personalised "
                 "your DXPO Diagnostic Report!!")
 
-            # Company Name — always visible,
-            # prominently displayed, optional
-            # but highly recommended
-            st.markdown(
-                "**🏢 Your Company Name** "
-                "*(optional — used to "
-                "personalise your DXPO "
-                "Diagnostic Report)*")
-            company_name_input = st.text_input(
-                "Company Name:",
-                placeholder=
-                "e.g. ABC KK, XYZ Corp, "
-                "Tanaka Manufacturing Ltd",
-                key="company_name_widget")
-            # Store in separate key to avoid
-            # widget/session_state conflict
-            st.session_state[
-                'company_name_val'] = (
-                company_name_input)
-            company_name = company_name_input
-            if company_name:
-                st.success(
-                    f"✅ Report will be "
-                    f"personalised for: "
-                    f"**{company_name}**")
-            else:
-                st.caption(
-                    "💡 Enter your company "
-                    "name for a personalised "
-                    "report — or leave blank "
-                    "to proceed anonymously.")
+            # Company name / country / size
+            # now collected in D1 (see D1b).
+            company_name = st.session_state.get(
+                'company_name_val', "")
 
             st.markdown("---")
 
@@ -2058,29 +2088,12 @@ if df is not None:
                 col1, col2 = st.columns(2)
 
                 with col1:
-                    opt_country = st.selectbox(
-                        "OPT-Q0: Country/Region?",
-                        ["Not answered",
-                         "🇯🇵 Japan",
-                         "🌏 Southeast Asia",
-                         "🌏 South Asia",
-                         "🌏 East Asia",
-                         "🌍 Middle East",
-                         "🌐 Global"])
-
                     opt_competitors = st.selectbox(
                         "OPT-Q1: Main competitors?",
                         ["Not answered",
                          "Domestic only",
                          "Global competitors",
                          "Both domestic + global"])
-
-                    opt_size = st.selectbox(
-                        "OPT-Q2: Company size?",
-                        ["Not answered",
-                         "SME (under 100 staff)",
-                         "Mid-size (100-1000)",
-                         "Large (over 1000)"])
 
                     opt_digital = st.selectbox(
                         "OPT-Q3: Current "
