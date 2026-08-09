@@ -63,7 +63,7 @@ T = {
             "🪄 DXPO AI — Business Pain "
             "Point Diagnostics & DX Strategy",
         "subtitle":
-            "*** JRR 49-T Aug 9, 2026*** | "
+            "*** JRR 50-T Aug 9, 2026*** | "
             "DXTICS Corp, Tokyo",
         "d1": "Your Company Business Sector",
         "d2": "Your Business Challenges",
@@ -154,7 +154,7 @@ L = T[st.session_state['lang']]
 
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver 49-T-Context Aug 9, 2026 | DXPOIT.com")
+    "Process Optimization ver 50-Profile | DXPOIT.com")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -162,6 +162,87 @@ st.markdown("---")
 # (answered BEFORE uploading any data,
 #  completed before submitting any data)
 # ══════════════════════════════════════════
+# ══════════════════════════════════════════
+# DXPO PROFILE — save / load
+# Everything stays on the USER's machine.
+# Nothing is written server-side, so client
+# data never leaves their laptop.
+# The loader MUST run before any D1 widget
+# is instantiated, or Streamlit refuses to
+# set the widget's session_state value.
+# ══════════════════════════════════════════
+import json as _json
+from datetime import datetime as _dt
+
+PROFILE_KEYS = [
+    "company_name_widget", "country_d1",
+    "size_d1", "primary_sector_0a",
+    "sub_sector_0a", "pre_hr", "pre_kpi",
+    "pre_quality", "pre_marketing",
+    "pre_ops", "pre_finance",
+]
+
+
+def dxpo_collect_profile():
+    """Small, human-readable. No dataset."""
+    return {
+        "_dxpo_profile": 1,
+        "app_version": "50",
+        "saved_at": _dt.now().strftime(
+            "%Y-%m-%d %H:%M"),
+        "fields": {
+            k: st.session_state.get(k)
+            for k in PROFILE_KEYS
+            if st.session_state.get(k)
+            not in (None, "")},
+        "ai_selected": st.session_state.get(
+            "d2_ai_selected", []),
+    }
+
+
+with st.sidebar:
+    st.markdown("### 💾 DXPO Profile")
+    st.caption(
+        "Your profile is saved to **your own "
+        "machine** as a small text file. "
+        "DXPO AI never stores your company "
+        "data on any server.")
+
+    _up = st.file_uploader(
+        "Load a saved profile",
+        type=["json"],
+        key="dxpo_profile_upload")
+
+    if (_up is not None and not
+            st.session_state.get(
+                "_dxpo_profile_loaded")):
+        try:
+            _d = _json.load(_up)
+            if not _d.get("_dxpo_profile"):
+                raise ValueError("not a DXPO file")
+            for _k, _v in _d.get(
+                    "fields", {}).items():
+                if _k in PROFILE_KEYS:
+                    st.session_state[_k] = _v
+            st.session_state["d2_ai_selected"] = (
+                _d.get("ai_selected", []))
+            st.session_state[
+                "_dxpo_profile_loaded"] = True
+            st.success(
+                f"✅ Loaded (saved "
+                f"{_d.get('saved_at', '')})")
+            st.rerun()
+        except Exception:
+            st.error(
+                "That doesn't look like a DXPO "
+                "profile file.")
+
+    if st.session_state.get(
+            "_dxpo_profile_loaded"):
+        st.caption("↻ Profile loaded. Change "
+                   "any field below to update "
+                   "it, then re-save.")
+
 d_badge(1, L["d1"])
 st.caption(
     "Tell us about your company's business "
@@ -501,6 +582,33 @@ with col_0b2:
     concern_finance_pre = st.checkbox(
         "💰 Financial Performance & Cost Control",
         key="pre_finance")
+
+# ── SAVE PROFILE (sidebar, placed here so
+#    it captures D1 + D2 state) ──
+_prof = dxpo_collect_profile()
+_nm = (st.session_state.get(
+    "company_name_widget") or "profile")
+_nm = "".join(c for c in _nm
+              if c.isalnum() or c in " -_").strip()
+_nm = _nm.replace(" ", "-") or "profile"
+_n_ticked = sum(
+    1 for _k in PROFILE_KEYS
+    if _k.startswith("pre_")
+    and st.session_state.get(_k))
+
+st.sidebar.download_button(
+    "💾 Save my DXPO profile",
+    data=_json.dumps(_prof, ensure_ascii=False,
+                     indent=2),
+    file_name=(
+        f"DXPO_{_nm}_"
+        f"{_dt.now().strftime('%Y-%m-%d')}.json"),
+    mime="application/json",
+    use_container_width=True)
+st.sidebar.caption(
+    f"Captures your company details and "
+    f"{_n_ticked} selected concern area(s). "
+    f"Your dataset is **not** included.")
 
 # Guidance based on selections
 if concern_marketing_pre and not (
