@@ -15,6 +15,113 @@ MODEL_FAST = "claude-haiku-4-5-20251001"
 MODEL_SMART = "claude-sonnet-5"
 
 
+# ══════════════════════════════════════════
+#  DXPO CAPABILITY TABLE  —  ★ EDIT ME ★
+#
+#  This is NOT AI. It is our own analytics
+#  knowledge, written down. It is
+#  deterministic, free, instant and never
+#  hallucinates — which makes it more
+#  reliable than any model for this job.
+#
+#  FOR THE ANALYTICS TEAM: this is a first
+#  draft from general practice. Please
+#  correct it from real engagements.
+#    "tests"  = what we can actually find
+#    "needs"  = what the data must contain,
+#               or the test silently fails
+#  Both are shown to the user, so keep the
+#  wording plain — no jargon.
+# ══════════════════════════════════════════
+DATA_CAPABILITIES = {
+    "Sales / transaction records": {
+        "tests": [
+            "revenue trend and seasonality",
+            "customer concentration risk",
+            "price vs volume effects",
+            "which products move together"],
+        "needs": "a date column, an amount, "
+                 "and ideally a customer or "
+                 "product ID",
+    },
+    "Customer / CRM records": {
+        "tests": [
+            "churn and dormancy patterns",
+            "customer segmentation",
+            "lifetime value by segment",
+            "which acquisition sources last"],
+        "needs": "one row per customer, with "
+                 "a join key to transactions",
+    },
+    "Production / machine / sensor logs": {
+        "tests": [
+            "downtime patterns by machine",
+            "shift and day-of-week effects",
+            "time between failures",
+            "throughput variance and "
+            "capacity loss"],
+        "needs": "a timestamp and a machine "
+                 "or line identifier",
+    },
+    "Quality / inspection records": {
+        "tests": [
+            "defect rate by line, shift "
+            "or supplier",
+            "whether defects cluster in time",
+            "first-pass yield",
+            "rework and scrap cost drivers"],
+        "needs": "a defect flag or count, "
+                 "plus what it is attributed "
+                 "to (line/supplier/shift)",
+    },
+    "Inventory / stock movements": {
+        "tests": [
+            "stock turnover by item class",
+            "dead and slow-moving stock",
+            "stockout frequency",
+            "demand variability"],
+        "needs": "item ID, quantity, and "
+                 "movement dates",
+    },
+    "HR / attendance / shift records": {
+        "tests": [
+            "overtime concentration",
+            "absenteeism patterns",
+            "link between shift and output",
+            "dependence on key individuals"],
+        "needs": "person or team ID and "
+                 "dates; no personal details "
+                 "required",
+    },
+    "Financial / accounting data": {
+        "tests": [
+            "margin by product or customer",
+            "cost structure drift over time",
+            "overhead absorption",
+            "fixed vs variable cost split"],
+        "needs": "a period column and cost "
+                 "or revenue lines",
+    },
+    "Survey / questionnaire responses": {
+        "tests": [
+            "what actually drives "
+            "satisfaction",
+            "differences between segments",
+            "link between attitude and "
+            "behaviour"],
+        "needs": "one row per respondent, "
+                 "several rating columns",
+    },
+    "Not sure yet": {
+        "tests": [
+            "upload anything and DXPO AI "
+            "will tell you what it can test"],
+        "needs": "nothing — we will look at "
+                 "your columns and advise",
+    },
+}
+
+
 def d_badge(num, label):
     """Blue Data Input badge header"""
     st.markdown(
@@ -63,7 +170,7 @@ T = {
             "🪄 DXPO AI — Business Pain "
             "Point Diagnostics & DX Strategy",
         "subtitle":
-            "*** JRR 50-T Aug 9, 2026*** | "
+            "*** JRR 51-T Aug 11, 2026*** | "
             "DXTICS Corp, Tokyo",
         "d1": "Your Company Business Sector",
         "d2": "Your Business Challenges",
@@ -154,7 +261,7 @@ L = T[st.session_state['lang']]
 
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver 50-Profile | DXPOIT.com")
+    "Process Optimization ver 51-Data | DXPOIT.com")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -398,6 +505,49 @@ if company_name:
     st.caption(f"✅ Report will be personalised "
                f"for: **{company_name}**")
 
+# ══════════════════════════════════════════
+# D1c — WHAT DATA DO YOU HAVE?
+# Asked BEFORE the AI suggests anything.
+# Answers here both sharpen D2 and teach the
+# user what their own data can reveal.
+# ══════════════════════════════════════════
+st.markdown("**📁 What kind of data can you "
+            "provide?** *(tick all that "
+            "apply — this is what DXPO AI "
+            "will test)*")
+
+data_types = st.multiselect(
+    "Data available:",
+    list(DATA_CAPABILITIES.keys()),
+    key="data_types_d1",
+    label_visibility="collapsed",
+    placeholder="Select the data you have "
+                "access to...")
+
+# Immediate value — before they do anything
+if data_types:
+    st.markdown(
+        "**🔬 With that data, DXPO AI can "
+        "look for:**")
+    for _dt_name in data_types:
+        _cap = DATA_CAPABILITIES[_dt_name]
+        st.markdown(
+            f"- **{_dt_name}** — "
+            + ", ".join(_cap["tests"]))
+        st.caption(f"　needs: {_cap['needs']}")
+    st.caption(
+        "⚠️ These are what we can *test for*. "
+        "What we actually find depends on "
+        "your data.")
+else:
+    st.caption(
+        "💡 Not sure? Tick **Not sure yet** — "
+        "upload anything and DXPO AI will "
+        "tell you what it can test.")
+
+data_ctx = (", ".join(data_types)
+            if data_types else "not specified")
+
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -465,7 +615,7 @@ D2_SYS = (
 @st.cache_data(ttl=60 * 60 * 24 * 7,
                show_spinner=False)
 def d2_ai_suggest(sector, subsector,
-                  market, size, n=6):
+                  market, size, data, n=6):
     """Cached per sector pair — a 50-person
     workshop on one sector costs 1 API call."""
     import json
@@ -482,6 +632,8 @@ def d2_ai_suggest(sector, subsector,
                  f"Sub-sector: {subsector}\n"
                  f"Market: {market}\n"
                  f"Company size: {size}\n"
+                 f"Data they can provide: "
+                 f"{data}\n"
                  f"Give exactly {n} challenges.")},
             {"role": "assistant", "content": "["},
         ])
@@ -518,7 +670,8 @@ with st.expander(
                     "points in this sector…"):
                 sugg = d2_ai_suggest(
                     primary_sector, sub_sector,
-                    market_ctx, size_ctx)
+                    market_ctx, size_ctx,
+                    data_ctx)
             st.session_state["d2_ai_error"] = None
         except Exception as e:
             sugg = []
@@ -989,6 +1142,18 @@ def try_merge(df_list, module_label):
         return None
 
 # Build the primary df for Marketing Dokku
+# ══════════════════════════════════════════
+# CROSS-BRANCH REPORT CONTEXT
+# Both of these are BUILT in the marketing
+# branch but CONSUMED in the operations
+# branch. Defined here at module scope so an
+# ops-only run (e.g. Machine A/B data) does
+# not hit a NameError. Empty string is the
+# correct "no marketing context" value.
+# ══════════════════════════════════════════
+d6_summary = ""
+stated_concerns_str = ""
+
 df = None
 if marketing_dfs:
     df = try_merge(
