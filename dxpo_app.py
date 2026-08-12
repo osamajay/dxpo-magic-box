@@ -170,7 +170,7 @@ T = {
             "🪄 DXPO AI — Business Pain "
             "Point Diagnostics & DX Strategy",
         "subtitle":
-            "*** JRR 51-T Aug 11, 2026*** | "
+            "*** JRR 52-T Aug 12, 2026*** | "
             "DXTICS Corp, Tokyo",
         "d1": "Your Company Business Sector",
         "d2": "Your Business Challenges",
@@ -261,7 +261,7 @@ L = T[st.session_state['lang']]
 
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver 51-Data | DXPOIT.com")
+    "Process Optimization ver 52-Fresh | DXPOIT.com")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -662,6 +662,20 @@ with st.expander(
     if st.button("🔍 Suggest challenges",
                  key="d2_ai_go"):
         st.session_state["d2_ai_run"] = True
+        # NEW ROUND: bump the round id so the
+        # checkboxes below get brand-new keys
+        # and start unticked. Without this,
+        # Streamlit keeps the old tick on
+        # position 2 even when position 2 is
+        # now a completely different challenge.
+        st.session_state["d2_round"] = (
+            st.session_state.get("d2_round", 0)
+            + 1)
+        for _k in [k for k in
+                   list(st.session_state.keys())
+                   if k.startswith("d2_ai_c_")]:
+            del st.session_state[_k]
+        st.session_state["d2_ai_selected"] = []
 
     if st.session_state.get("d2_ai_run"):
         try:
@@ -695,7 +709,9 @@ with st.expander(
                 "⚪")
             if st.checkbox(
                     f"{mark} {s['challenge']}",
-                    key=f"d2_ai_{i}"):
+                    key=(f"d2_ai_c_"
+                         f"{st.session_state.get('d2_round', 0)}"
+                         f"_{i}")):
                 # pre-tick the load-bearing box
                 st.session_state[
                     D2_MODULE_KEYS[s["module"]]
