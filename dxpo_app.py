@@ -170,7 +170,7 @@ T = {
             "🪄 DXPO AI — Business Pain "
             "Point Diagnostics & DX Strategy",
         "subtitle":
-            "*** JRR 52-T Aug 12, 2026*** | "
+            "*** JRR 52-Fresh, Aug 15, 2026*** | "
             "DXTICS Corp, Tokyo",
         "d1": "Your Company Business Sector",
         "d2": "Your Business Challenges",
@@ -261,7 +261,7 @@ L = T[st.session_state['lang']]
 
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver 52-Fresh | DXPOIT.com")
+    "Process Optimization ver 52-Fresh * | DXPOIT.com")
 st.markdown("---")
 
 # ══════════════════════════════════════════
