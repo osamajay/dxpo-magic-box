@@ -170,7 +170,7 @@ T = {
             "🪄 DXPO AI — Business Pain "
             "Point Diagnostics & DX Strategy",
         "subtitle":
-            "*** JRR 52-Fresh, Aug 15, 2026*** | "
+            "*** JRR 54-N Aug 16 9:55pm, 2026*** | "
             "DXTICS Corp, Tokyo",
         "d1": "Your Company Business Sector",
         "d2": "Your Business Challenges",
@@ -261,7 +261,7 @@ L = T[st.session_state['lang']]
 
 st.caption(
     "Digital Transformation-driven "
-    "Process Optimization ver 52-Fresh * | DXPOIT.com")
+    "Process Optimization ver 54-Reset | DXPOIT.com")
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -659,6 +659,26 @@ with st.expander(
         "module below will switch on "
         "automatically.")
 
+    # Show WHICH data the suggestions were
+    # shaped by, so the user can see the link
+    # back to their D1 answer — and knows to
+    # go back and change it.
+    if data_types:
+        st.caption(
+            "📁 Suggestions are focused on what "
+            "your data could actually show: "
+            + "; ".join(data_types)
+            + ".  *Change your data selection "
+            "in D1 and press Suggest again to "
+            "see a different angle.*")
+    else:
+        st.caption(
+            "📁 You haven't told us what data "
+            "you have yet. Go back to D1 and "
+            "tick **What kind of data can you "
+            "provide?** — the suggestions below "
+            "get noticeably sharper.")
+
     if st.button("🔍 Suggest challenges",
                  key="d2_ai_go"):
         st.session_state["d2_ai_run"] = True
@@ -676,6 +696,14 @@ with st.expander(
                    if k.startswith("d2_ai_c_")]:
             del st.session_state[_k]
         st.session_state["d2_ai_selected"] = []
+        # A new round is a clean slate: clear the
+        # six concern boxes too, so nothing stays
+        # ticked from a challenge list the user is
+        # no longer looking at. Safe here because
+        # these widgets are instantiated further
+        # down the script, after this runs.
+        for _mk in set(D2_MODULE_KEYS.values()):
+            st.session_state[_mk] = False
 
     if st.session_state.get("d2_ai_run"):
         try:
